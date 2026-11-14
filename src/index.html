@@ -7,13 +7,15 @@
     <title>桌宠</title>
     <link rel="stylesheet" href="../assets/idle-layout.css" />
     <link rel="stylesheet" href="./styles.css" />
+    <script src="./app.js" defer></script>
   </head>
   <body>
     <main class="stage" id="stage">
       <section class="pet-screen" id="pet-screen" aria-label="桌面宠物">
         <div class="character-handle" aria-label="绘梨衣，按住左键拖动，右键打开菜单">
           <span class="character-stage" id="character-stage">
-            <video class="character" id="character" src="../assets/idle.webm" poster="../assets/idle-poster.png" aria-label="绘梨衣待机动画" autoplay loop muted playsinline preload="auto" disablepictureinpicture draggable="false"></video>
+            <video class="character is-active" id="character-a" src="../assets/idle.webm" poster="../assets/idle-poster.png" aria-label="绘梨衣待机动画" autoplay loop muted playsinline preload="auto" disablepictureinpicture draggable="false"></video>
+            <video class="character" id="character-b" aria-hidden="true" autoplay loop muted playsinline preload="auto" disablepictureinpicture draggable="false"></video>
           </span>
         </div>
       </section>

@@ -15,14 +15,14 @@ def ffmpeg(*args):
     return ["ffmpeg", "-nostdin", "-hide_banner", "-loglevel", "error", *map(str, args)]
 
 
-def first_frame(source):
+def first_frame(source, expect_green=True):
     pam = subprocess.check_output(ffmpeg("-i", source, "-frames:v", 1, "-pix_fmt", "rgb24", "-c:v", "pam", "-f", "image2pipe", "pipe:1"))
     header, pixels = pam.split(b"ENDHDR\n", 1)
     fields = dict(line.split(maxsplit=1) for line in header.splitlines()[1:])
     width, height = int(fields[b"WIDTH"]), int(fields[b"HEIGHT"])
     corners = [0, width - 1, width * (height - 1), width * height - 1]
     color = tuple(int(statistics.median(pixels[index * 3 + channel] for index in corners)) for channel in range(3))
-    if color[1] < max(color[0], color[2]) + 30:
+    if expect_green and color[1] < max(color[0], color[2]) + 30:
         raise ValueError("Expected an evenly lit green background.")
     return width, height, color
 
@@ -64,6 +64,19 @@ def greenscreen_filter(key):
         "alpha(X,Y)*if(gt(g(X,Y)-max(r(X,Y),b(X,Y)),6),"
         f"clip((0.18-{dominance})/0.10,0,1),1)"
     )
+
+
+def light_background_filter(key):
+    # The generated eating clip uses a pale neutral background. A chroma key
+    # removes that background while retaining the darker outlines around the
+    # white sleeves and rice bowl.
+    return f"chromakey={key}:0.12:0.03,format=rgba,lut=a='if(lt(val,8),0,val)'"
+
+
+def background_filter(key, background):
+    if background == "light":
+        return light_background_filter(key)
+    return greenscreen_filter(key)
     return (
         f"chromakey={key}:0.12:0.02,format=gbrap,"
         f"geq=r='r(X,Y)':g='g(X,Y)':b='b(X,Y)':a='{edge_alpha}',"
@@ -107,7 +120,7 @@ def shape_rectangles(mask, width, height, padding):
     return rectangles
 
 
-def encode_clean_video(source, clip, video_filter, video_width, video_height):
+def encode_clean_video(source, clip, video_filter, video_width, video_height, crf, fps):
     """Decode RGBA frames, remove green spill, then encode a transparent WebM."""
     decoder = subprocess.Popen(
         ffmpeg("-i", source, "-vf", video_filter, "-an", "-pix_fmt", "rgba", "-f", "rawvideo", "pipe:1"),
@@ -117,8 +130,8 @@ def encode_clean_video(source, clip, video_filter, video_width, video_height):
     encoder = subprocess.Popen(
         ffmpeg(
             "-y", "-f", "rawvideo", "-pixel_format", "rgba", "-video_size", f"{video_width}x{video_height}",
-            "-framerate", "24", "-i", "pipe:0", "-an", "-c:v", "libvpx-vp9", "-pix_fmt", "yuva420p",
-            "-b:v", "0", "-lossless", "1", "-cpu-used", "4", "-row-mt", "1", "-auto-alt-ref", "0",
+            "-framerate", str(fps), "-i", "pipe:0", "-an", "-c:v", "libvpx-vp9", "-pix_fmt", "yuva420p",
+            "-b:v", "0", "-crf", str(crf), "-cpu-used", "5", "-row-mt", "1", "-auto-alt-ref", "0",
             "-metadata:s:v:0", "alpha_mode=1", clip,
         ),
         stdin=subprocess.PIPE,
@@ -180,16 +193,24 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("input", type=Path)
     parser.add_argument("--height", type=int, default=225)
+    parser.add_argument("--crf", type=int, default=28, help="VP9 quality; lower is sharper and larger (default: 28).")
+    parser.add_argument("--fps", type=int, default=24, help="Output frame rate (default: 24).")
+    parser.add_argument("--background", choices=("green", "light"), default="green", help="Input background type (default: green).")
+    parser.add_argument("--key-color", help="Optional key color such as 0xf3f3f3; otherwise sample the corners.")
     parser.add_argument("--output-dir", type=Path, default=Path(__file__).resolve().parents[1] / "assets")
     args = parser.parse_args()
     if args.height < 64:
         parser.error("The display height must be at least 64 pixels.")
+    if not 0 <= args.crf <= 63:
+        parser.error("CRF must be between 0 and 63.")
+    if not 1 <= args.fps <= 120:
+        parser.error("FPS must be between 1 and 120.")
     output = args.output_dir
     output.mkdir(parents=True, exist_ok=True)
 
-    source_width, source_height, color = first_frame(args.input)
-    key = "0x" + "".join(f"{value:02x}" for value in color)
-    key_filter = greenscreen_filter(key)
+    source_width, source_height, color = first_frame(args.input, args.background == "green")
+    key = args.key_color or ("0x" + "".join(f"{value:02x}" for value in color))
+    key_filter = background_filter(key, args.background)
     analysis_height = 450
     analysis_width = round(source_width / source_height * analysis_height / 2) * 2
     mask, _ = alpha_union(ffmpeg("-i", args.input, "-vf", f"{key_filter},scale={analysis_width}:{analysis_height}", "-an", "-pix_fmt", "rgba", "-f", "rawvideo", "pipe:1"), analysis_width, analysis_height)
@@ -204,8 +225,8 @@ def main():
     display_width = round(crop_width / crop_height * display_height)
     video_width, video_height = display_width * 2, display_height * 2
     clip = output / "idle.webm"
-    cleaned_filter = f"chromakey={key}:0.12:0.02,format=rgba,crop={crop_width}:{crop_height}:{crop_x}:{crop_y},scale={video_width}:{video_height},format=rgba"
-    frames = encode_clean_video(args.input, clip, cleaned_filter, video_width, video_height)
+    cleaned_filter = f"{key_filter},crop={crop_width}:{crop_height}:{crop_x}:{crop_y},scale={video_width}:{video_height},format=rgba"
+    frames = encode_clean_video(args.input, clip, cleaned_filter, video_width, video_height, args.crf, args.fps)
     subprocess.run(ffmpeg("-y", "-c:v", "libvpx-vp9", "-i", clip, "-frames:v", 1, output / "idle-poster.png"), check=True)
 
     mask, frames = alpha_union(ffmpeg("-c:v", "libvpx-vp9", "-i", clip, "-vf", f"scale={display_width}:{display_height}", "-an", "-pix_fmt", "rgba", "-f", "rawvideo", "pipe:1"), display_width, display_height)

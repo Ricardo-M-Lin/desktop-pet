@@ -10,3 +10,13 @@ __pycache__/
 
 # Local generation/reference output, not part of the app.
 /output/
+
+# Local MiniMax H3 model weights are large and stay outside version control.
+/.minimax-h3-models/
+/.minimax-h3-test-*
+*.safetensors
+*.safetensors.part*
+
+# Runtime dumps
+/runtime/
+*.pyc
