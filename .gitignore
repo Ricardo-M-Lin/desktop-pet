@@ -1,22 +1,19 @@
+# 依赖
 node_modules/
-dist/
-out/
-release/
+
+# 运行与调试产物
+output/
+*.log
+logs/
+runtime/
+
+# Python 缓存
+__pycache__/
+*.pyc
+
+# 系统/编辑器杂项
 .DS_Store
 Thumbs.db
-*.log
-.env
-__pycache__/
-
-# Local generation/reference output, not part of the app.
-/output/
-
-# Local MiniMax H3 model weights are large and stay outside version control.
-/.minimax-h3-models/
-/.minimax-h3-test-*
-*.safetensors
-*.safetensors.part*
-
-# Runtime dumps
-/runtime/
-*.pyc
+desktop.ini
+.vscode/
+.idea/
