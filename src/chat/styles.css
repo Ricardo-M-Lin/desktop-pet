@@ -2240,3 +2240,91 @@ input[type="range"] {
   color: #8c7179;
   border-top: 1px solid rgba(255, 255, 255, 0.05);
 }
+
+/* 星云图 */
+.nebula-wrap {
+  position: relative;
+  flex: 1;
+  min-height: 300px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: radial-gradient(circle at 50% 45%, rgba(70, 24, 38, 0.35), rgba(10, 5, 9, 0.9) 70%);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.memory-body { min-height: 0; }
+
+.nebula-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  cursor: grab;
+}
+
+.nebula-tip {
+  position: absolute;
+  max-width: 180px;
+  padding: 4px 8px;
+  border-radius: 8px;
+  background: rgba(20, 10, 15, 0.96);
+  border: 1px solid rgba(228, 105, 115, 0.35);
+  color: #f6e6ea;
+  font-size: 11.5px;
+  line-height: 1.4;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.nebula-detail {
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  bottom: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(24, 13, 19, 0.96);
+  border: 1px solid rgba(228, 105, 115, 0.3);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.45);
+  z-index: 4;
+}
+
+.nebula-detail[hidden] { display: none; }
+
+.nebula-detail-text {
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: #f4e3e7;
+  word-break: break-word;
+}
+
+.nebula-detail-meta {
+  margin-top: 4px;
+  font-size: 11px;
+  color: #a1848d;
+}
+
+.nebula-detail-btn {
+  margin-top: 8px;
+  border: 1px solid rgba(228, 105, 115, 0.4);
+  background: rgba(228, 105, 115, 0.12);
+  color: #f0c3c9;
+  border-radius: 8px;
+  padding: 5px 10px;
+  font-size: 11.5px;
+  cursor: pointer;
+}
+
+.nebula-detail-btn:hover { background: rgba(228, 105, 115, 0.24); }
+
+.memory-tabs {
+  flex-wrap: wrap;
+  overflow: visible;
+  gap: 5px;
+}
+
+.memory-tabs::-webkit-scrollbar { display: none; }
+
+.memory-tab {
+  padding: 4px 9px;
+  font-size: 11.5px;
+}

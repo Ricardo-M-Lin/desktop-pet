@@ -1858,12 +1858,71 @@ boot().catch((error) => {
 /* ------------------------------------------------------------------ */
 
 /* ------------------------------------------------------------------ */
-/* 头像菜单 + 识海面板                                                 */
+
+/* ------------------------------------------------------------------ */
+/* 头像菜单                                                            */
+/* ------------------------------------------------------------------ */
+
+function setupAvatarMenu() {
+  const avatar = document.getElementById("identity-avatar");
+  const menu = document.getElementById("avatar-menu");
+  const voiceBtn = document.getElementById("avatar-menu-voice");
+  if (!avatar || !menu) return;
+
+  const close = () => { menu.hidden = true; };
+  const refreshVoiceLabel = () => {
+    if (voiceBtn) voiceBtn.textContent = voiceOn() ? "静音" : "声音开";
+  };
+
+  avatar.addEventListener("click", (event) => {
+    event.stopPropagation();
+    if (menu.hidden) {
+      menu.hidden = false;
+      refreshVoiceLabel();
+    } else {
+      close();
+    }
+  });
+
+  document.addEventListener("click", (event) => {
+    if (menu.hidden) return;
+    if (menu.contains(event.target) || avatar.contains(event.target)) return;
+    close();
+  });
+
+  menu.querySelectorAll("[data-action]").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      const action = btn.dataset.action;
+      close();
+      if (action === "call") {
+        try { ERI.openCall(); } catch {}
+        return;
+      }
+      if (action === "persona") { openSettings("persona"); return; }
+      if (action === "settings") { openSettings("connection"); return; }
+      if (action === "voice") {
+        const next = !voiceOn();
+        if (!next) stopSpeech();
+        const result = await ERI.saveSettings({ voiceEnabled: next });
+        if (!result?.ok) { toast(result?.error || "切换失败。", "error"); return; }
+        state.settings = result.settings;
+        updateVoiceChip();
+        return;
+      }
+      if (action === "memory") openMemory("nebula");
+    });
+  });
+}
+
+/* ------------------------------------------------------------------ */
+/* 识海：星云图 + 列表                                                 */
 /* ------------------------------------------------------------------ */
 
 let memoryData = null;
-let memoryTab = "facts";
+let memoryTab = "nebula";
 let memoryQuery = "";
+let nebulaFrame = 0;
+let nebulaCleanup = null;
 
 function memoryLines(text) {
   return String(text || "")
@@ -1872,14 +1931,317 @@ function memoryLines(text) {
     .filter(Boolean);
 }
 
+function buildNebulaNodes(data) {
+  const nodes = [];
+  (data.facts || []).forEach((f) => {
+    nodes.push({ type: "fact", label: f.content, meta: f.created, color: "#ff8f9b", r: 5 });
+  });
+  (data.loops || []).forEach((l) => {
+    nodes.push({ type: "loop", label: l.content, meta: l.due, color: "#ffc46b", r: 5.5 });
+  });
+  memoryLines(data.timeline).forEach((line) => {
+    nodes.push({ type: "timeline", label: line, meta: "", color: "#8fd0ff", r: 4 });
+  });
+  return nodes;
+}
+
+function bigrams(text) {
+  const clean = String(text || "").replace(/[^\u4e00-\u9fffA-Za-z0-9]/g, "");
+  const set = new Set();
+  for (let i = 0; i < clean.length - 1; i += 1) set.add(clean.slice(i, i + 2));
+  return set;
+}
+
+function buildNebulaLinks(nodes) {
+  const links = [];
+  const sets = nodes.map((n) => bigrams(n.label));
+  for (let i = 0; i < nodes.length; i += 1) {
+    for (let j = i + 1; j < nodes.length; j += 1) {
+      let shared = 0;
+      sets[i].forEach((g) => { if (sets[j].has(g)) shared += 1; });
+      if (shared > 0) links.push({ a: i, b: j, w: Math.min(1, shared / 4) });
+    }
+  }
+  return links;
+}
+
+function renderNebula(body) {
+  const nodes = buildNebulaNodes(memoryData || {});
+  if (!nodes.length) {
+    body.innerHTML =
+      '<div class="mem-empty">还没有记忆星。聊天时说「我叫…」「我喜欢…」她会记下来，之后这里会慢慢亮起来。</div>';
+    return;
+  }
+
+  body.innerHTML =
+    '<div class="nebula-wrap"><canvas class="nebula-canvas" id="nebula-canvas"></canvas>' +
+    '<div class="nebula-tip" id="nebula-tip" hidden></div>' +
+    '<div class="nebula-detail" id="nebula-detail" hidden></div></div>';
+
+  const wrap = body.querySelector(".nebula-wrap");
+  const canvas = body.querySelector("#nebula-canvas");
+  const tip = body.querySelector("#nebula-tip");
+  const detail = body.querySelector("#nebula-detail");
+  const ctx = canvas.getContext("2d");
+  const dpr = window.devicePixelRatio || 1;
+  let w = 0;
+  let h = 0;
+
+  let resizeObserver = null;
+  const resize = () => {
+    w = wrap.clientWidth;
+    h = wrap.clientHeight;
+    canvas.width = Math.max(1, Math.floor(w * dpr));
+    canvas.height = Math.max(1, Math.floor(h * dpr));
+    canvas.style.width = w + "px";
+    canvas.style.height = h + "px";
+  };
+  resize();
+
+  const links = buildNebulaLinks(nodes);
+  const cols = Math.ceil(Math.sqrt(nodes.length));
+  nodes.forEach((n, i) => {
+    n.x = (i % cols) / Math.max(1, cols - 1) * w * 0.7 + w * 0.15 + (Math.random() - 0.5) * 20;
+    n.y = Math.floor(i / cols) / Math.max(1, Math.ceil(nodes.length / cols) - 1) * h * 0.65 + h * 0.12 + (Math.random() - 0.5) * 20;
+    n.vx = 0;
+    n.vy = 0;
+  });
+
+  // 黄金角螺旋分布：稳定、均匀，不会因为物理模拟飞出去
+  const layout = () => {
+    const cx = w / 2;
+    const cy = h / 2;
+    const golden = Math.PI * (3 - Math.sqrt(5));
+    const maxR = Math.min(w, h) * 0.42;
+    nodes.forEach((n, i) => {
+      const t = (i + 0.5) / nodes.length;
+      const r = Math.sqrt(t) * maxR;
+      const a = i * golden;
+      n.x = cx + Math.cos(a) * r * (w > h ? 1.12 : 1);
+      n.y = cy + Math.sin(a) * r;
+      n.x = Math.max(30, Math.min(w - 30, n.x));
+      n.y = Math.max(30, Math.min(h - 30, n.y));
+      n.vx = 0;
+      n.vy = 0;
+    });
+  };
+  layout();
+
+  let zoom = 1;
+  let panX = 0;
+  let panY = 0;
+  let hover = -1;
+  let selected = -1;
+  let dragging = false;
+  let dragStart = null;
+
+  const toWorld = (sx, sy) => ({
+    x: (sx - w / 2 - panX) / zoom + w / 2,
+    y: (sy - h / 2 - panY) / zoom + h / 2,
+  });
+
+  const hitTest = (sx, sy) => {
+    const p = toWorld(sx, sy);
+    let best = -1;
+    let bestD = 14 / zoom;
+    nodes.forEach((n, i) => {
+      const d = Math.hypot(n.x - p.x, n.y - p.y);
+      if (d < bestD) { bestD = d; best = i; }
+    });
+    return best;
+  };
+
+  const draw = () => {
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, w, h);
+
+    const grad = ctx.createRadialGradient(w / 2, h / 2, 0, w / 2, h / 2, Math.max(w, h) * 0.6);
+    grad.addColorStop(0, "rgba(90, 28, 46, 0.30)");
+    grad.addColorStop(1, "rgba(12, 6, 10, 0)");
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, w, h);
+
+    ctx.save();
+    ctx.translate(w / 2 + panX, h / 2 + panY);
+    ctx.scale(zoom, zoom);
+    ctx.translate(-w / 2, -h / 2);
+
+    ctx.lineWidth = 0.7;
+    for (const l of links) {
+      const a = nodes[l.a];
+      const b = nodes[l.b];
+      ctx.strokeStyle = `rgba(228, 125, 140, ${0.05 + l.w * 0.18})`;
+      ctx.beginPath();
+      ctx.moveTo(a.x, a.y);
+      ctx.lineTo(b.x, b.y);
+      ctx.stroke();
+    }
+
+    const t = Date.now() / 1000;
+    nodes.forEach((n, i) => {
+      const pulse = 1 + Math.sin(t * 1.4 + i) * 0.12;
+      const active = i === hover || i === selected;
+      const r = n.r * pulse * (active ? 1.6 : 1);
+      const swayX = Math.sin(t * 0.5 + i * 1.7) * 1.6;
+      const swayY = Math.cos(t * 0.42 + i * 2.1) * 1.6;
+      const nx = n.x + swayX;
+      const ny = n.y + swayY;
+
+      const glow = ctx.createRadialGradient(nx, ny, 0, nx, ny, r * 5);
+      glow.addColorStop(0, n.color + "cc");
+      glow.addColorStop(0.35, n.color + "55");
+      glow.addColorStop(1, n.color + "00");
+      ctx.fillStyle = glow;
+      ctx.beginPath();
+      ctx.arc(nx, ny, r * 5, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = active ? "#fff5f7" : n.color;
+      ctx.beginPath();
+      ctx.arc(nx, ny, r, 0, Math.PI * 2);
+      ctx.fill();
+
+      if (active) {
+        ctx.strokeStyle = "rgba(255, 220, 226, 0.8)";
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.arc(nx, ny, r + 5, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+    });
+    ctx.restore();
+  };
+
+  const loop = () => {
+    draw();
+    nebulaFrame = requestAnimationFrame(loop);
+  };
+
+  const showTip = (i, sx, sy) => {
+    if (i < 0) { tip.hidden = true; return; }
+    const n = nodes[i];
+    tip.textContent = n.label.length > 40 ? n.label.slice(0, 40) + "…" : n.label;
+    tip.hidden = false;
+    tip.style.left = Math.min(Math.max(8, sx + 12), w - 190) + "px";
+    tip.style.top = Math.max(8, sy - 28) + "px";
+  };
+
+  const showDetail = (i) => {
+    if (i < 0) { detail.hidden = true; return; }
+    const n = nodes[i];
+    detail.hidden = false;
+    detail.innerHTML =
+      `<div class="nebula-detail-text">${escapeHtml(n.label)}</div>` +
+      `<div class="nebula-detail-meta">${escapeHtml(n.meta || "")}${n.type === "loop" ? " · 未完成" : ""}</div>` +
+      `<button class="nebula-detail-btn" id="nebula-remove" type="button">${n.type === "loop" ? "标记完成" : "删除这条记忆"}</button>`;
+    detail.querySelector("#nebula-remove").addEventListener("click", async () => {
+      const result = await ERI.deleteMemory({
+        type: n.type === "loop" ? "loop" : "fact",
+        content: n.label,
+      });
+      if (!result?.ok) { toast("删除失败。", "error"); return; }
+      memoryData = await ERI.listMemory();
+      renderMemory();
+    });
+  };
+
+  canvas.addEventListener("mousemove", (event) => {
+    const rect = canvas.getBoundingClientRect();
+    const sx = event.clientX - rect.left;
+    const sy = event.clientY - rect.top;
+    if (dragging && dragStart) {
+      panX += sx - dragStart.sx;
+      panY += sy - dragStart.sy;
+      dragStart = { sx, sy };
+      return;
+    }
+    hover = hitTest(sx, sy);
+    canvas.style.cursor = hover >= 0 ? "pointer" : "grab";
+    showTip(hover, sx, sy);
+  });
+
+  let downPos = null;
+  let moved = false;
+
+  canvas.addEventListener("mousedown", (event) => {
+    const rect = canvas.getBoundingClientRect();
+    downPos = { sx: event.clientX - rect.left, sy: event.clientY - rect.top };
+    dragStart = { ...downPos };
+    dragging = false;
+    moved = false;
+    canvas.style.cursor = "grabbing";
+  });
+
+  window.addEventListener("mousemove", (event) => {
+    if (!downPos) return;
+    const rect = canvas.getBoundingClientRect();
+    const sx = event.clientX - rect.left;
+    const sy = event.clientY - rect.top;
+    if (Math.hypot(sx - downPos.sx, sy - downPos.sy) > 3) {
+      moved = true;
+      dragging = true;
+      panX += sx - dragStart.sx;
+      panY += sy - dragStart.sy;
+      dragStart = { sx, sy };
+    }
+  });
+
+  window.addEventListener("mouseup", (event) => {
+    if (!downPos) return;
+    const rect = canvas.getBoundingClientRect();
+    const sx = event.clientX - rect.left;
+    const sy = event.clientY - rect.top;
+    if (!moved) {
+      selected = hitTest(sx, sy);
+      showDetail(selected);
+    }
+    downPos = null;
+    dragStart = null;
+    dragging = false;
+    canvas.style.cursor = hover >= 0 ? "pointer" : "grab";
+  });
+
+  canvas.addEventListener("wheel", (event) => {
+    event.preventDefault();
+    zoom = Math.max(0.5, Math.min(2.4, zoom * (event.deltaY > 0 ? 0.92 : 1.08)));
+  }, { passive: false });
+
+  if (window.ResizeObserver) {
+    resizeObserver = new ResizeObserver(() => {
+      resize();
+      layout();
+    });
+    resizeObserver.observe(wrap);
+  }
+
+  loop();
+  nebulaCleanup = () => {
+    cancelAnimationFrame(nebulaFrame);
+    if (resizeObserver) resizeObserver.disconnect();
+  };
+}
+
 function renderMemory() {
   const body = document.getElementById("memory-body");
   const foot = document.getElementById("memory-foot");
   const search = document.getElementById("memory-search");
   if (!body) return;
+  if (nebulaCleanup) { nebulaCleanup(); nebulaCleanup = null; }
+
   const data = memoryData || {};
   const q = memoryQuery.trim();
-  search.style.display = memoryTab === "facts" || memoryTab === "timeline" ? "" : "none";
+  if (search) {
+    search.style.display = memoryTab === "nebula" || memoryTab === "loops" || memoryTab === "self" || memoryTab === "canon" ? "none" : "";
+  }
+
+  if (memoryTab === "nebula") {
+    renderNebula(body);
+    if (foot) {
+      const count = buildNebulaNodes(data).length;
+      foot.textContent = `${count} 颗记忆星 · 拖动平移 · 滚轮缩放 · 点一下看内容`;
+    }
+    return;
+  }
 
   const card = (content, meta) =>
     `<div class="mem-card"><div class="mem-text">${escapeHtml(content)}</div>` +
@@ -1930,17 +2292,14 @@ function renderMemory() {
       const type = btn.dataset.del;
       const content = btn.dataset.content;
       const result = await ERI.deleteMemory({ type, content });
-      if (!result?.ok) {
-        toast("删除失败。", "error");
-        return;
-      }
+      if (!result?.ok) { toast("删除失败。", "error"); return; }
       memoryData = await ERI.listMemory();
       renderMemory();
     });
   });
 }
 
-async function openMemory(tab = "facts") {
+async function openMemory(tab = "nebula") {
   memoryTab = tab;
   memoryQuery = "";
   const modal = document.getElementById("memory-modal");
@@ -1960,6 +2319,7 @@ async function openMemory(tab = "facts") {
 function closeMemory() {
   const modal = document.getElementById("memory-modal");
   if (modal) modal.hidden = true;
+  if (nebulaCleanup) { nebulaCleanup(); nebulaCleanup = null; }
 }
 
 function setupMemoryPanel() {
@@ -1991,70 +2351,6 @@ function setupMemoryPanel() {
       renderMemory();
     });
   }
-}
-
-function setupAvatarMenu() {
-  const avatar = document.getElementById("identity-avatar");
-  const menu = document.getElementById("avatar-menu");
-  const voiceBtn = document.getElementById("avatar-menu-voice");
-  if (!avatar || !menu) return;
-
-  const close = () => {
-    menu.hidden = true;
-  };
-  const refreshVoiceLabel = () => {
-    if (voiceBtn) voiceBtn.textContent = voiceOn() ? "静音" : "声音开";
-  };
-
-  avatar.addEventListener("click", (event) => {
-    event.stopPropagation();
-    if (menu.hidden) {
-      menu.hidden = false;
-      refreshVoiceLabel();
-    } else {
-      close();
-    }
-  });
-
-  document.addEventListener("click", (event) => {
-    if (menu.hidden) return;
-    if (menu.contains(event.target) || avatar.contains(event.target)) return;
-    close();
-  });
-
-  menu.querySelectorAll("[data-action]").forEach((btn) => {
-    btn.addEventListener("click", async () => {
-      const action = btn.dataset.action;
-      close();
-      if (action === "call") {
-        try { ERI.openCall(); } catch {}
-        return;
-      }
-      if (action === "persona") {
-        openSettings("persona");
-        return;
-      }
-      if (action === "settings") {
-        openSettings("connection");
-        return;
-      }
-      if (action === "voice") {
-        const next = !voiceOn();
-        if (!next) stopSpeech();
-        const result = await ERI.saveSettings({ voiceEnabled: next });
-        if (!result?.ok) {
-          toast(result?.error || "切换失败。", "error");
-          return;
-        }
-        state.settings = result.settings;
-        updateVoiceChip();
-        return;
-      }
-      if (action === "memory") {
-        openMemory("facts");
-      }
-    });
-  });
 }
 
 setupAvatarMenu();
