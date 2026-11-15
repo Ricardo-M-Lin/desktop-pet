@@ -25,6 +25,7 @@ contextBridge.exposeInMainWorld("eri", {
   testConnection: (payload) => ipcRenderer.invoke("api:test", payload),
   locatePet: () => ipcRenderer.invoke("pet:locate"),
   listMemory: () => ipcRenderer.invoke("shihai:list"),
+  deleteMemory: (payload) => ipcRenderer.invoke("shihai:delete", payload),
   exportText: (payload) => ipcRenderer.invoke("dialog:export", payload),
 
   listVoices: () => ipcRenderer.invoke("tts:voices"),

@@ -1856,24 +1856,152 @@ boot().catch((error) => {
 });
 
 /* ------------------------------------------------------------------ */
-/* 头像菜单                                                            */
+
 /* ------------------------------------------------------------------ */
+/* 头像菜单 + 识海面板                                                 */
+/* ------------------------------------------------------------------ */
+
+let memoryData = null;
+let memoryTab = "facts";
+let memoryQuery = "";
+
+function memoryLines(text) {
+  return String(text || "")
+    .split("\n")
+    .map((line) => line.replace(/^[-#*\s]+/, "").trim())
+    .filter(Boolean);
+}
+
+function renderMemory() {
+  const body = document.getElementById("memory-body");
+  const foot = document.getElementById("memory-foot");
+  const search = document.getElementById("memory-search");
+  if (!body) return;
+  const data = memoryData || {};
+  const q = memoryQuery.trim();
+  search.style.display = memoryTab === "facts" || memoryTab === "timeline" ? "" : "none";
+
+  const card = (content, meta) =>
+    `<div class="mem-card"><div class="mem-text">${escapeHtml(content)}</div>` +
+    (meta ? `<div class="mem-meta">${meta}</div>` : "") +
+    `</div>`;
+
+  let html = "";
+  let count = 0;
+
+  if (memoryTab === "facts") {
+    const items = (data.facts || []).filter((f) => !q || String(f.content).includes(q));
+    count = items.length;
+    html = items
+      .map((f) =>
+        `<div class="mem-card"><div class="mem-text">${escapeHtml(f.content)}</div>` +
+        `<div class="mem-meta">${escapeHtml((f.created || "").slice(0, 10))}${f.source ? " · " + escapeHtml(f.source) : ""}` +
+        `<button class="mem-del" type="button" data-del="fact" data-content="${escapeHtml(f.content)}">删除</button></div></div>`,
+      )
+      .join("");
+    if (!html) html = '<div class="mem-empty">还没记住什么。聊天时说「我叫…」「我喜欢…」她会记下来。</div>';
+  } else if (memoryTab === "loops") {
+    const items = data.loops || [];
+    count = items.length;
+    html = items
+      .map((l) =>
+        `<div class="mem-card"><div class="mem-text">${escapeHtml(l.content)}</div>` +
+        `<div class="mem-meta">${l.due ? "截止 " + escapeHtml(l.due) : "没设期限"}` +
+        `<button class="mem-del" type="button" data-del="loop" data-content="${escapeHtml(l.content)}">完成</button></div></div>`,
+      )
+      .join("");
+    if (!html) html = '<div class="mem-empty">没有答应过还没做完的事。</div>';
+  } else if (memoryTab === "timeline") {
+    const items = memoryLines(data.timeline).filter((x) => !q || x.includes(q));
+    count = items.length;
+    html = items.map((line) => card(line, "")).join("") || '<div class="mem-empty">时间线还是空的。</div>';
+  } else {
+    const source = memoryTab === "self" ? data.self : data.canon;
+    const items = memoryLines(source);
+    count = items.length;
+    html = items.map((line) => card(line, "")).join("") || '<div class="mem-empty">还没有内容。</div>';
+  }
+
+  body.innerHTML = html;
+  if (foot) foot.textContent = `共 ${count} 条 · 只存在本机`;
+
+  body.querySelectorAll("[data-del]").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      const type = btn.dataset.del;
+      const content = btn.dataset.content;
+      const result = await ERI.deleteMemory({ type, content });
+      if (!result?.ok) {
+        toast("删除失败。", "error");
+        return;
+      }
+      memoryData = await ERI.listMemory();
+      renderMemory();
+    });
+  });
+}
+
+async function openMemory(tab = "facts") {
+  memoryTab = tab;
+  memoryQuery = "";
+  const modal = document.getElementById("memory-modal");
+  const search = document.getElementById("memory-search");
+  if (!modal) return;
+  modal.hidden = false;
+  if (search) search.value = "";
+  document.querySelectorAll(".memory-tab").forEach((el) => {
+    el.classList.toggle("active", el.dataset.tab === memoryTab);
+  });
+  const body = document.getElementById("memory-body");
+  if (body) body.innerHTML = '<div class="mem-empty">读取中…</div>';
+  memoryData = await ERI.listMemory();
+  renderMemory();
+}
+
+function closeMemory() {
+  const modal = document.getElementById("memory-modal");
+  if (modal) modal.hidden = true;
+}
+
+function setupMemoryPanel() {
+  const modal = document.getElementById("memory-modal");
+  if (!modal) return;
+  document.getElementById("memory-close")?.addEventListener("click", closeMemory);
+  modal.addEventListener("click", (event) => {
+    if (event.target === modal) closeMemory();
+  });
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && !modal.hidden) closeMemory();
+  });
+  document.querySelectorAll(".memory-tab").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      memoryTab = btn.dataset.tab;
+      memoryQuery = "";
+      const search = document.getElementById("memory-search");
+      if (search) search.value = "";
+      document.querySelectorAll(".memory-tab").forEach((el) => {
+        el.classList.toggle("active", el.dataset.tab === memoryTab);
+      });
+      renderMemory();
+    });
+  });
+  const search = document.getElementById("memory-search");
+  if (search) {
+    search.addEventListener("input", () => {
+      memoryQuery = search.value || "";
+      renderMemory();
+    });
+  }
+}
 
 function setupAvatarMenu() {
   const avatar = document.getElementById("identity-avatar");
   const menu = document.getElementById("avatar-menu");
-  const mainView = document.getElementById("avatar-menu-main");
-  const memView = document.getElementById("avatar-menu-memory");
-  const memList = document.getElementById("avatar-menu-list");
   const voiceBtn = document.getElementById("avatar-menu-voice");
-  if (!avatar || !menu || !mainView || !memView || !memList) return;
+  if (!avatar || !menu) return;
 
   const close = () => {
     menu.hidden = true;
-    mainView.hidden = false;
-    memView.hidden = true;
   };
-
   const refreshVoiceLabel = () => {
     if (voiceBtn) voiceBtn.textContent = voiceOn() ? "静音" : "声音开";
   };
@@ -1882,8 +2010,6 @@ function setupAvatarMenu() {
     event.stopPropagation();
     if (menu.hidden) {
       menu.hidden = false;
-      mainView.hidden = false;
-      memView.hidden = true;
       refreshVoiceLabel();
     } else {
       close();
@@ -1899,18 +2025,16 @@ function setupAvatarMenu() {
   menu.querySelectorAll("[data-action]").forEach((btn) => {
     btn.addEventListener("click", async () => {
       const action = btn.dataset.action;
+      close();
       if (action === "call") {
-        close();
         try { ERI.openCall(); } catch {}
         return;
       }
       if (action === "persona") {
-        close();
         openSettings("persona");
         return;
       }
       if (action === "settings") {
-        close();
         openSettings("connection");
         return;
       }
@@ -1924,36 +2048,15 @@ function setupAvatarMenu() {
         }
         state.settings = result.settings;
         updateVoiceChip();
-        refreshVoiceLabel();
         return;
       }
       if (action === "memory") {
-        mainView.hidden = true;
-        memView.hidden = false;
-        memList.innerHTML = '<div class="mem-empty">读取中…</div>';
-        try {
-          const data = await ERI.listMemory();
-          const items = [];
-          for (const f of data?.facts || []) {
-            items.push(
-              `<div class="mem-item">${escapeHtml(f.content)}<br /><span class="mem-empty">${escapeHtml(
-                (f.created || "").slice(0, 10),
-              )}</span></div>`,
-            );
-          }
-          for (const l of data?.loops || []) {
-            items.push(`<div class="mem-item">· ${escapeHtml(l.content)}（未完成）</div>`);
-          }
-          memList.innerHTML = items.length
-            ? items.join("")
-            : '<div class="mem-empty">还没记住什么。聊天时说「我叫…」「我喜欢…」她会记下来。</div>';
-        } catch {
-          memList.innerHTML = '<div class="mem-empty">读取失败。</div>';
-        }
+        openMemory("facts");
       }
     });
   });
 }
 
 setupAvatarMenu();
+setupMemoryPanel();
 

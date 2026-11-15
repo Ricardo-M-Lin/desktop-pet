@@ -824,14 +824,44 @@ const SHIHAI_HINT = /(记住|记一下|别忘|我叫|我住|我是|我的生日|
 
 ipcMain.handle("shihai:list", () => {
   try {
-    const facts = readShihaiJson("facts.json").slice(-30).reverse();
-    const loops = readShihaiJson("open_loops.json").filter((x) => x && x.status === "open").slice(-10);
+    const facts = readShihaiJson("facts.json").slice(-80).reverse();
+    const loops = readShihaiJson("open_loops.json").slice(-40).reverse();
     return {
-      facts: facts.map((f) => ({ content: String(f?.content || ""), created: String(f?.created || "") })),
-      loops: loops.map((l) => ({ content: String(l?.content || ""), due: String(l?.due || "") })),
+      facts: facts.map((f) => ({
+        content: String(f?.content || ""),
+        created: String(f?.created || ""),
+        source: String(f?.source || ""),
+      })),
+      loops: loops
+        .filter((l) => l && l.status === "open")
+        .map((l) => ({ content: String(l?.content || ""), due: String(l?.due || ""), created: String(l?.created || "") })),
+      timeline: readShihai("timeline.md"),
+      self: readShihai("self.md"),
+      owner: readShihai("owner.md"),
+      canon: readShihai("canon.md"),
     };
   } catch {
-    return { facts: [], loops: [] };
+    return { facts: [], loops: [], timeline: "", self: "", owner: "", canon: "" };
+  }
+});
+
+ipcMain.handle("shihai:delete", (_event, payload) => {
+  try {
+    const type = String(payload?.type || "");
+    const content = String(payload?.content || "");
+    if (!content) return { ok: false };
+    if (type === "loop") {
+      const loops = readShihaiJson("open_loops.json");
+      const next = loops.filter((l) => String(l?.content || "") !== content);
+      fs.writeFileSync(path.join(SHIHAI_DIR, "open_loops.json"), JSON.stringify(next.slice(-100), null, 2), "utf8");
+      return { ok: true };
+    }
+    const facts = readShihaiJson("facts.json");
+    const next = facts.filter((f) => String(f?.content || "") !== content);
+    fs.writeFileSync(path.join(SHIHAI_DIR, "facts.json"), JSON.stringify(next.slice(-300), null, 2), "utf8");
+    return { ok: true };
+  } catch {
+    return { ok: false };
   }
 });
 

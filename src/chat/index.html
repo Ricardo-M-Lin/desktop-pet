@@ -120,17 +120,43 @@
         </div>
       </header>
 
-      <div class="avatar-menu" id="avatar-menu" hidden>
-        <div class="avatar-menu-view" id="avatar-menu-main">
-          <button class="avatar-menu-item" type="button" data-action="call">视频通话</button>
-          <button class="avatar-menu-item" type="button" data-action="persona">更换性格</button>
-          <button class="avatar-menu-item" type="button" data-action="memory">记忆</button>
-          <button class="avatar-menu-item" type="button" data-action="voice" id="avatar-menu-voice">静音</button>
-          <button class="avatar-menu-item" type="button" data-action="settings">设置</button>
-        </div>
-        <div class="avatar-menu-view" id="avatar-menu-memory" hidden>
-          <div class="avatar-menu-head">她记住的事</div>
-          <div class="avatar-menu-list" id="avatar-menu-list"></div>
+            <div class="avatar-menu" id="avatar-menu" hidden>
+        <button class="avatar-menu-item" type="button" data-action="call">
+          <span class="am-ico">☎</span><span>视频通话</span>
+        </button>
+        <button class="avatar-menu-item" type="button" data-action="persona">
+          <span class="am-ico">♡</span><span>更换性格</span>
+        </button>
+        <button class="avatar-menu-item" type="button" data-action="memory">
+          <span class="am-ico">✦</span><span>记忆</span>
+        </button>
+        <button class="avatar-menu-item" type="button" data-action="voice" id="avatar-menu-voice">
+          <span class="am-ico">♪</span><span>静音</span>
+        </button>
+        <button class="avatar-menu-item" type="button" data-action="settings">
+          <span class="am-ico">⚙</span><span>设置</span>
+        </button>
+      </div>
+
+      <div class="memory-modal" id="memory-modal" hidden>
+        <div class="memory-card">
+          <header class="memory-head">
+            <div>
+              <div class="memory-title">识海</div>
+              <div class="memory-sub">她记得的事，只存在本机</div>
+            </div>
+            <button class="memory-close" id="memory-close" type="button" aria-label="关闭">×</button>
+          </header>
+          <nav class="memory-tabs">
+            <button class="memory-tab active" type="button" data-tab="facts">事实</button>
+            <button class="memory-tab" type="button" data-tab="loops">未完成</button>
+            <button class="memory-tab" type="button" data-tab="timeline">时间线</button>
+            <button class="memory-tab" type="button" data-tab="self">自我</button>
+            <button class="memory-tab" type="button" data-tab="canon">语气</button>
+          </nav>
+          <input class="memory-search" id="memory-search" type="text" placeholder="搜一搜她记住的事…" />
+          <div class="memory-body" id="memory-body"></div>
+          <footer class="memory-foot" id="memory-foot"></footer>
         </div>
       </div>
 
