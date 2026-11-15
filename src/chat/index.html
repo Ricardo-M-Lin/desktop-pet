@@ -1,0 +1,477 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; img-src 'self' data:; media-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'none';"
+    />
+    <title>绘梨衣 · 桌宠对话</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <svg class="svg-sprite" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <symbol id="i-pin" viewBox="0 0 24 24">
+        <path d="M12 17v5" />
+        <path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 1 1 0 0 0 0-2H8a1 1 0 0 0 0 2 1 1 0 0 1 1 1z" />
+      </symbol>
+      <symbol id="i-settings" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="3" />
+        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+      </symbol>
+      <symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14" /></symbol>
+      <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></symbol>
+      <symbol id="i-send" viewBox="0 0 24 24"><path d="M12 19V5" /><path d="m5 12 7-7 7 7" /></symbol>
+      <symbol id="i-stop" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2" /></symbol>
+      <symbol id="i-copy" viewBox="0 0 24 24">
+        <rect x="9" y="9" width="13" height="13" rx="2" />
+        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+      </symbol>
+      <symbol id="i-refresh" viewBox="0 0 24 24">
+        <path d="M21 12a9 9 0 1 1-2.64-6.36" />
+        <path d="M21 3v6h-6" />
+      </symbol>
+      <symbol id="i-check" viewBox="0 0 24 24"><path d="m20 6-11 11-5-5" /></symbol>
+      <symbol id="i-eye" viewBox="0 0 24 24">
+        <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z" />
+        <circle cx="12" cy="12" r="3" />
+      </symbol>
+      <symbol id="i-eye-off" viewBox="0 0 24 24">
+        <path d="m3 3 18 18" />
+        <path d="M10.6 10.6a2 2 0 0 0 2.8 2.8" />
+        <path d="M9.9 5.2A10.4 10.4 0 0 1 12 5c6.5 0 10 7 10 7a18 18 0 0 1-3.2 4.1" />
+        <path d="M6.2 6.2A18.3 18.3 0 0 0 2 12s3.5 7 10 7a10.6 10.6 0 0 0 4.1-.8" />
+      </symbol>
+      <symbol id="i-locate" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="8" />
+        <circle cx="12" cy="12" r="3" />
+        <path d="M12 2v3" /><path d="M12 19v3" /><path d="M2 12h3" /><path d="M19 12h3" />
+      </symbol>
+      <symbol id="i-export" viewBox="0 0 24 24">
+        <path d="M12 3v12" /><path d="m7 8 5-5 5 5" />
+        <path d="M5 15v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4" />
+      </symbol>
+      <symbol id="i-trash" viewBox="0 0 24 24">
+        <path d="M3 6h18" /><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" /><path d="M10 11v6" /><path d="M14 11v6" />
+      </symbol>
+      <symbol id="i-power" viewBox="0 0 24 24">
+        <path d="M12 2v10" /><path d="M18.4 6.6a9 9 0 1 1-12.8 0" />
+      </symbol>
+      <symbol id="i-spark" viewBox="0 0 24 24">
+        <path d="M12 3l1.7 5.3L19 10l-5.3 1.7L12 17l-1.7-5.3L5 10l5.3-1.7L12 3Z" />
+        <path d="M19 16l.7 2.3L22 19l-2.3.7L19 22l-.7-2.3L16 19l2.3-.7L19 16Z" />
+      </symbol>
+      <symbol id="i-heart" viewBox="0 0 24 24">
+        <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1.1 1L12 21l7.7-7.6 1.1-1a5.5 5.5 0 0 0 0-7.8Z" />
+      </symbol>
+      <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6" /></symbol>
+      <symbol id="i-alert" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="9" /><path d="M12 8v5" /><path d="M12 16h.01" />
+      </symbol>
+      <symbol id="i-phone" viewBox="0 0 24 24">
+        <path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.3 1.8.6 2.6a2 2 0 0 1-.5 2.1L8.1 9.6a16 16 0 0 0 6.3 6.3l1.2-1.1a2 2 0 0 1 2.1-.5c.8.3 1.7.5 2.6.6a2 2 0 0 1 1.7 2Z" />
+      </symbol>
+      <symbol id="i-volume" viewBox="0 0 24 24">
+        <path d="M11 5 6 9H3v6h3l5 4V5Z" />
+        <path d="M15.5 8.5a5 5 0 0 1 0 7" />
+        <path d="M18.5 5.5a9 9 0 0 1 0 13" />
+      </symbol>
+      <symbol id="i-volume-off" viewBox="0 0 24 24">
+        <path d="M11 5 6 9H3v6h3l5 4V5Z" />
+        <path d="m16 9 5 6" /><path d="m21 9-5 6" />
+      </symbol>
+    </svg>
+
+    <div class="app" id="app">
+      <div class="ambient ambient-a"></div>
+      <div class="ambient ambient-b"></div>
+      <div class="grain"></div>
+
+      <header class="titlebar" id="titlebar">
+        <div class="identity-avatar" id="identity-avatar" title="戳我一下" role="button" tabindex="0">
+          <img src="../assets/eri-avatar.png" alt="绘梨衣" draggable="false" />
+          <span class="presence" id="presence"></span>
+        </div>
+        <span class="avatar-bubble" id="avatar-bubble" aria-live="polite"></span>
+        <div class="identity-copy">
+          <div class="identity-name">绘梨衣</div>
+          <div class="identity-status">
+            <span class="status-dot" id="status-dot"></span>
+            <span id="status-text">在桌面陪着你</span>
+          </div>
+        </div>
+        <div class="window-actions">
+          <button class="icon-btn" id="btn-call" type="button" title="视频通话">
+            <svg class="ico"><use href="#i-phone"></use></svg>
+          </button>
+          <button class="icon-btn" id="btn-pin" type="button" title="置顶窗口">
+            <svg class="ico"><use href="#i-pin"></use></svg>
+          </button>
+          <button class="icon-btn" id="btn-settings" type="button" title="设置 (Ctrl+,)">
+            <svg class="ico"><use href="#i-settings"></use></svg>
+          </button>
+          <button class="icon-btn" id="btn-min" type="button" title="最小化">
+            <svg class="ico"><use href="#i-minus"></use></svg>
+          </button>
+          <button class="icon-btn close" id="btn-close" type="button" title="隐藏到托盘">
+            <svg class="ico"><use href="#i-x"></use></svg>
+          </button>
+        </div>
+      </header>
+
+      <main class="scroll" id="scroll">
+        <section class="hero" id="hero">
+          <div class="hero-stage">
+            <div class="hero-halo"></div>
+            <div class="hero-quote">
+              <span>你来了。</span>
+              <i></i>
+            </div>
+            <video
+              class="hero-video"
+              id="hero-video"
+              src="../assets/eri-idle.webm"
+              poster="../assets/eri-idle-poster.png"
+              autoplay
+              loop
+              muted
+              playsinline
+              preload="auto"
+              disablepictureinpicture
+              draggable="false"
+            ></video>
+            <div class="hero-shadow"></div>
+          </div>
+          <div class="hero-copy">
+            <div class="eyebrow">ERI · DESKTOP COMPANION</div>
+            <h1 id="hero-title">晚上好。</h1>
+            <p id="hero-sub">今天也辛苦了。要在这里坐一会儿吗？</p>
+          </div>
+          <div class="hero-chips" id="hero-chips">
+            <button class="suggestion" type="button" data-send="今天有点累，陪我说说话吧。">今天有点累</button>
+            <button class="suggestion" type="button" data-send="陪我聊一会儿，随便什么都行。">陪我聊一会儿</button>
+            <button class="suggestion" type="button" data-send="夸夸我今天做得好的地方。">夸夸我</button>
+            <button class="suggestion" type="button" data-send="你现在在做什么呀？">你在做什么？</button>
+          </div>
+          <p class="hero-fineprint">她住在你的桌面上，也住在这台电脑里。</p>
+        </section>
+
+        <section class="messages" id="messages" aria-live="polite"></section>
+        <div class="scroll-tail"></div>
+      </main>
+
+      <button class="new-msg-pill" id="new-msg-pill" type="button">
+        新消息
+        <span>↓</span>
+      </button>
+
+      <footer class="composer-wrap">
+        <div class="composer" id="composer">
+          <textarea
+            id="input"
+            rows="1"
+            maxlength="4000"
+            placeholder="和绘梨衣说点什么…"
+            autocomplete="off"
+            spellcheck="false"
+          ></textarea>
+          <div class="composer-row">
+            <div class="meta-chips">
+              <button class="meta-chip" id="chip-persona" type="button" title="调整性格">
+                <svg class="ico"><use href="#i-heart"></use></svg>
+                <span id="chip-persona-label">上杉绘梨衣</span>
+              </button>
+              <button class="meta-chip" id="chip-model" type="button" title="切换模型">
+                <svg class="ico"><use href="#i-spark"></use></svg>
+                <span id="chip-model-label">DeepSeek</span>
+              </button>
+              <button class="meta-chip" id="chip-voice" type="button" title="朗读开关">
+                <svg class="ico"><use id="chip-voice-icon" href="#i-volume"></use></svg>
+                <span id="chip-voice-label">声音开</span>
+              </button>
+            </div>
+            <button class="send-btn" id="btn-send" type="button" title="发送 (Enter)">
+              <svg class="ico send-icon"><use href="#i-send"></use></svg>
+              <svg class="ico stop-icon"><use href="#i-stop"></use></svg>
+            </button>
+          </div>
+        </div>
+        <div class="fineprint">Enter 发送 · Shift + Enter 换行 · Ctrl + Shift + E 呼出</div>
+      </footer>
+
+      <div class="settings-layer" id="settings-layer" hidden>
+        <div class="scrim" data-close-settings></div>
+        <section class="sheet" role="dialog" aria-modal="true" aria-labelledby="settings-title">
+          <header class="sheet-head">
+            <div>
+              <div class="eyebrow">ERI · SETTINGS</div>
+              <h2 id="settings-title">设置</h2>
+            </div>
+            <button class="icon-btn" type="button" data-close-settings title="关闭">
+              <svg class="ico"><use href="#i-x"></use></svg>
+            </button>
+          </header>
+
+          <nav class="tabs" role="tablist" aria-label="设置分类">
+            <button class="tab active" type="button" data-tab="persona" role="tab">性格</button>
+            <button class="tab" type="button" data-tab="voice" role="tab">声音</button>
+            <button class="tab" type="button" data-tab="connection" role="tab">连接</button>
+            <button class="tab" type="button" data-tab="more" role="tab">其他</button>
+          </nav>
+
+          <div class="sheet-body">
+            <section class="pane active" data-pane="persona">
+              <div class="pane-head">
+                <h3>她是什么样的人？</h3>
+                <p>选一个起点，或者直接改写下面的提示词。保存后，下一次回复就会生效。</p>
+              </div>
+
+              <div class="preset-grid" id="preset-grid"></div>
+
+              <label class="field">
+                <span class="field-label">性格提示词 <em id="persona-count">0 / 20000</em></span>
+                <textarea
+                  id="persona-prompt"
+                  rows="9"
+                  maxlength="20000"
+                  placeholder="描述她的身份、性格、说话方式、和你的关系…"
+                ></textarea>
+              </label>
+              <p class="note">
+                可以用 <code>{{user}}</code> 和 <code>{{char}}</code> 作为占位符。发送时会自动附加一段安全底线。
+              </p>
+
+              <label class="field">
+                <span class="field-label">她怎么称呼你</span>
+                <input id="user-name" type="text" maxlength="24" placeholder="留空的话，就叫你“你”" />
+              </label>
+            </section>
+
+            <section class="pane" data-pane="voice">
+              <div class="pane-head">
+                <h3>让她出声</h3>
+                <p>回复会用语音念出来。用的是微软 Edge 的在线语音，不需要额外密钥。</p>
+              </div>
+
+              <div class="switch-row">
+                <div class="switch-copy">
+                  <span>朗读回复</span>
+                  <small>她说完一句，就念一句</small>
+                </div>
+                <label class="switch">
+                  <input id="voice-enabled" type="checkbox" checked />
+                  <span class="track"><span class="thumb"></span></span>
+                </label>
+              </div>
+
+              <label class="field">
+                <span class="field-label">音色</span>
+                <select id="voice-id" class="field-select"></select>
+                <span class="range-caption"><i id="voice-hint">默认，声音偏暖、语速自然</i></span>
+              </label>
+
+              <div class="switch-row">
+                <div class="switch-copy">
+                  <span>本机语音服务</span>
+                  <small id="tts-status-text">正在检测…</small>
+                </div>
+                <button class="mini-btn" id="btn-tts-start" type="button">启动</button>
+              </div>
+
+              <label class="field">
+                <span class="field-label">服务目录</span>
+                <input id="local-root" type="text" maxlength="300" placeholder="C:\Users\…\GPT-SoVITS" />
+              </label>
+
+              <label class="field">
+                <span class="field-label">参考音频文本</span>
+                <input id="local-prompt" type="text" maxlength="500" placeholder="参考音频里说的那句话" />
+              </label>
+
+              <label class="field">
+                <span class="field-label">语速 <em id="voice-rate-value">+0%</em></span>
+                <input id="voice-rate" type="range" min="-30" max="30" step="5" value="0" />
+                <span class="range-caption"><i>慢一点</i><i>快一点</i></span>
+              </label>
+
+              <div class="inline-actions">
+                <button class="btn ghost" id="btn-voice-test" type="button">
+                  <svg class="ico"><use href="#i-volume"></use></svg>
+                  试听
+                </button>
+                <span class="test-status" id="voice-status"></span>
+              </div>
+
+              <p class="note">
+                第一次朗读要等一两秒做语音合成，之后同样的句子会直接放缓存。语音由微软在线合成，
+                要朗读的文字会发送到微软的语音服务；断网时她会安静下来，只显示文字。
+              </p>
+            </section>
+
+            <section class="pane" data-pane="connection">              <div class="pane-head">
+                <h3>连接你的 API</h3>
+                <p>默认读取本机 DSH 的配置，不填写也能直接聊天。也可以单独指定地址、密钥和模型。</p>
+              </div>
+
+              <div class="source-card">
+                <span class="source-dot" id="source-dot"></span>
+                <div class="source-copy">
+                  <strong id="api-source">正在读取本机配置…</strong>
+                  <small id="api-masked"></small>
+                </div>
+                <button class="mini-btn" id="btn-use-dsh" type="button">改用本机配置</button>
+              </div>
+
+              <label class="field">
+                <span class="field-label">API 地址</span>
+                <input id="base-url" type="text" maxlength="300" placeholder="https://open-ai.baomiao.cn/v1" />
+              </label>
+
+              <label class="field">
+                <span class="field-label">API Key</span>
+                <div class="input-with-action">
+                  <input id="api-key" type="password" maxlength="500" placeholder="留空则继续使用当前密钥" />
+                  <button class="inline-icon" id="btn-eye" type="button" title="显示 / 隐藏">
+                    <svg class="ico"><use href="#i-eye"></use></svg>
+                  </button>
+                </div>
+              </label>
+
+              <label class="field">
+                <span class="field-label">模型</span>
+                <div class="input-with-action">
+                  <input id="model-input" type="text" maxlength="160" list="model-list" placeholder="DeepSeek-V4.1-Flash 1017(1.20x)" />
+                  <datalist id="model-list"></datalist>
+                  <button class="inline-icon" id="btn-refresh" type="button" title="刷新模型列表">
+                    <svg class="ico"><use href="#i-refresh"></use></svg>
+                  </button>
+                </div>
+              </label>
+
+              <div class="field-grid">
+                <label class="field">
+                  <span class="field-label">温度 <em id="temp-value">0.90</em></span>
+                  <input id="temperature" type="range" min="0" max="1.5" step="0.05" value="0.9" />
+                  <span class="range-caption"><i>更稳定</i><i>更有性格</i></span>
+                </label>
+                <label class="field">
+                  <span class="field-label">回复上限</span>
+                  <div class="number-wrap">
+                    <input id="max-tokens" type="number" min="64" max="2048" step="32" value="420" />
+                    <span>tokens</span>
+                  </div>
+                </label>
+              </div>
+
+              <label class="field">
+                <span class="field-label">携带上下文 <em>条消息</em></span>
+                <div class="number-wrap">
+                  <input id="context-messages" type="number" min="4" max="100" step="2" value="40" />
+                  <span>最近</span>
+                </div>
+              </label>
+
+              <div class="switch-row">
+                <div class="switch-copy">
+                  <span>流式输出</span>
+                  <small>边生成边显示，不用等整段回复</small>
+                </div>
+                <label class="switch">
+                  <input id="stream" type="checkbox" checked />
+                  <span class="track"><span class="thumb"></span></span>
+                </label>
+              </div>
+
+              <div class="inline-actions">
+                <button class="btn ghost" id="btn-test" type="button">
+                  <svg class="ico"><use href="#i-refresh"></use></svg>
+                  测试连接
+                </button>
+                <span class="test-status" id="test-status"></span>
+              </div>
+
+              <p class="note">
+                密钥由主进程加密保存在本机，不会进入聊天页面。请求会从你的电脑直接发往 API。
+              </p>
+            </section>
+
+            <section class="pane" data-pane="more">
+              <div class="pane-head">
+                <h3>让她更顺手一点</h3>
+                <p>这些都只影响这台电脑上的窗口，不会改动你的桌宠程序。</p>
+              </div>
+
+              <div class="switch-list">
+                <div class="switch-row">
+                  <div class="switch-copy">
+                    <span>窗口置顶</span>
+                    <small>让她一直待在其他窗口上面</small>
+                  </div>
+                  <label class="switch">
+                    <input id="pinned" type="checkbox" />
+                    <span class="track"><span class="thumb"></span></span>
+                  </label>
+                </div>
+                <div class="switch-row">
+                  <div class="switch-copy">
+                    <span>回复通知</span>
+                    <small>窗口隐藏时，用系统通知提醒你</small>
+                  </div>
+                  <label class="switch">
+                    <input id="notifications" type="checkbox" checked />
+                    <span class="track"><span class="thumb"></span></span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="action-grid">
+                <button class="action-btn" id="btn-locate" type="button">
+                  <svg class="ico"><use href="#i-locate"></use></svg>
+                  <span><strong>重新定位</strong><small>回到桌宠身边</small></span>
+                </button>
+                <button class="action-btn" id="btn-export" type="button">
+                  <svg class="ico"><use href="#i-export"></use></svg>
+                  <span><strong>导出记录</strong><small>保存为 Markdown</small></span>
+                </button>
+                <button class="action-btn danger" id="btn-clear" type="button">
+                  <svg class="ico"><use href="#i-trash"></use></svg>
+                  <span><strong>清空聊天</strong><small>从头开始</small></span>
+                </button>
+                <button class="action-btn danger" id="btn-quit" type="button">
+                  <svg class="ico"><use href="#i-power"></use></svg>
+                  <span><strong>退出应用</strong><small>关闭全部窗口</small></span>
+                </button>
+              </div>
+
+              <p class="note">
+                快捷键 <code>Ctrl + Shift + E</code> 可以随时呼出 / 收起窗口。点关闭只会隐藏到托盘，从托盘菜单可以彻底退出。
+              </p>
+
+              <div class="about-card">
+                <img src="../assets/eri-avatar.png" alt="" draggable="false" />
+                <div>
+                  <strong>绘梨衣 · 桌宠对话</strong>
+                  <span id="about-version">v1.0.0</span>
+                  <p>独立于桌宠程序运行。立绘素材来自你的桌宠项目，只读复制，不会改动原文件。</p>
+                </div>
+              </div>
+            </section>
+          </div>
+
+          <footer class="sheet-foot">
+            <span class="save-hint" id="save-hint">更改会在保存后生效</span>
+            <button class="btn ghost" type="button" data-close-settings>取消</button>
+            <button class="btn primary" id="btn-save" type="button">保存</button>
+          </footer>
+        </section>
+      </div>
+
+      <div class="toast-stack" id="toasts" aria-live="polite"></div>
+    </div>
+
+    <script src="./personas.js"></script>
+    <script src="./app.js"></script>
+  </body>
+</html>

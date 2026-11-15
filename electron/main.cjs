@@ -243,32 +243,17 @@ function openCallWindow() {
   ensureCallServer().catch(() => {});
 }
 
-function openChatWindow(argvExtra = []) {
-  const chatDir = path.join(app.getPath("documents"), "绘梨衣对话");
-  const chatExe = path.join(chatDir, "runtime", "electron", "electron.exe");
-  const env = { ...process.env };
-  delete env.ELECTRON_RUN_AS_NODE;
-  try {
-    const child = spawn(chatExe, [chatDir, ...argvExtra], {
-      detached: true,
-      stdio: "ignore",
-      env,
-      windowsHide: true,
-    });
-    child.on("error", () => {
-      dialog.showErrorBox(
-        "打不开绘梨衣对话",
-        "找不到对话窗口程序，请确认这个目录还在：\n" + chatDir,
-      );
-    });
-    child.unref();
-  } catch (error) {
-    dialog.showErrorBox(
-      "打不开绘梨衣对话",
-      String(error && error.message ? error.message : error),
-    );
+function openChatWindow(withCall = false) {
+  // 对话窗现在直接跑在桌宠进程里，不再启动第二个 Electron
+  const chat = require("./chat-backend.cjs");
+  chat.createChatWindow();
+  if (withCall) {
+    setTimeout(() => {
+      try { chat.openCallWindow(); } catch {}
+    }, 600);
   }
 }
+
 
 function createPetWindow() {
   const { workArea } = screen.getPrimaryDisplay();
@@ -317,8 +302,8 @@ function createPetWindow() {
   const contextMenu = Menu.buildFromTemplate([
     { label: "待机（右下角，不自动走动）", click: () => parkInIdle(workArea, width) },
     { label: "恢复自动行走", click: resumeAutoWalk },
-    { label: "打开绘梨衣对话", click: () => openChatWindow() },
-    { label: "视频通话", click: () => openChatWindow(["--call"]) },
+    { label: "打开绘梨衣对话", click: () => openChatWindow(false) },
+    { label: "视频通话", click: () => openChatWindow(true) },
     { type: "separator" },
     { label: "退出", click: () => app.quit() },
   ]);
@@ -360,6 +345,12 @@ if (!app.requestSingleInstanceLock()) {
   });
   app.whenReady().then(() => {
     createPetWindow();
+    // 调试入口：--chat 直接开对话窗，--call 再开视频通话
+    if (process.argv.includes("--chat") || process.argv.includes("--call")) {
+      setTimeout(() => {
+        openChatWindow(process.argv.includes("--call"));
+      }, 800);
+    }
     if (process.argv.includes("--call")) {
       setTimeout(openCallWindow, 600);
     }

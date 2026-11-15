@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; img-src 'self' data:; media-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src http://127.0.0.1:8890;"
+    />
+    <title>绘梨衣 · 视频通话</title>
+    <link rel="stylesheet" href="./call.css" />
+  </head>
+  <body>
+    <div class="stage">
+      <div class="glow" id="glow"></div>
+      <div class="room">
+        <video
+          id="avatar"
+          src="../assets/idle.webm"
+          poster="../assets/idle-poster.png"
+          autoplay
+          loop
+          muted
+          playsinline
+          disablepictureinpicture
+        ></video>
+        <div class="mouth" id="mouth"></div>
+      </div>
+
+      <header class="topbar">
+        <div class="who">
+          <span class="dot" id="dot"></span>
+          <span class="name">上杉绘梨衣</span>
+          <span class="status" id="status">连接中…</span>
+        </div>
+        <button class="hangup" id="hangup" type="button">挂断</button>
+      </header>
+
+      <div class="captions">
+        <div class="line user" id="user-line"></div>
+        <div class="line reply" id="reply-line"></div>
+      </div>
+
+      <div class="startoverlay" id="startoverlay">
+        <div class="startcard">
+          <div class="starttitle">和绘梨衣通话</div>
+          <div class="startdesc">点开始后才会打开麦克风</div>
+          <button class="startbtn" id="startbtn" type="button">开始通话</button>
+        </div>
+      </div>
+
+      <div class="hint" id="hint">正在连接语音服务…</div>
+    </div>
+    <script src="./call.js"></script>
+  </body>
+</html>
