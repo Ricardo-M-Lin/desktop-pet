@@ -1,0 +1,27 @@
+{
+  "model": "Erii_Call_Bust",
+  "reference": "source/eri_call_bust_guide.png",
+  "faceGuide": "source/eri_call_face_guide.png",
+  "defaultHands": "hidden",
+  "gestureLayers": ["hand_wave_left", "hand_wave_right", "hand_heart", "hand_greeting"],
+  "groups": {
+    "body": ["neck", "torso", "collar", "obi", "chest_ornament", "left_sleeve", "right_sleeve"],
+    "backHair": ["back_hair_main", "back_hair_left", "back_hair_right", "long_hair_tips"],
+    "face": ["face_base", "ears", "nose_shadow", "blush_left", "blush_right"],
+    "frontHair": ["bangs_main", "bang_left", "bang_right", "side_lock_left", "side_lock_right"],
+    "eyes": ["eye_white_left", "eye_white_right", "iris_left", "iris_right", "pupil_left", "pupil_right", "upper_lid_left", "upper_lid_right", "lower_lid_left", "lower_lid_right", "eyebrow_left", "eyebrow_right", "highlight_left", "highlight_right"],
+    "mouth": ["mouth_neutral", "mouth_smile", "mouth_open_small", "mouth_open_wide", "mouth_shy"],
+    "accessories": ["hair_bow_left", "hair_bow_right", "tassel_left", "tassel_right", "hair_ornament_highlight"],
+    "expressions": ["blush_strong", "happy_eye_left", "happy_eye_right", "sweat_drop", "tear"]
+  },
+  "firstParameters": [
+    "ParamAngleX", "ParamAngleY", "ParamAngleZ", "ParamEyeBallX", "ParamEyeBallY",
+    "ParamEyeLOpen", "ParamEyeROpen", "ParamBrowLY", "ParamBrowRY",
+    "ParamMouthOpenY", "ParamMouthForm", "ParamBreath", "ParamHairSway"
+  ],
+  "notes": [
+    "Reconstruct hidden hair and sleeve pixels before rigging.",
+    "Keep default hands out of frame; reveal gesture layers only for actions.",
+    "Import as a layered PSD in Cubism Editor once the editor is available."
+  ]
+}

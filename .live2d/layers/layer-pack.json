@@ -1,0 +1,220 @@
+{
+  "source": ".live2d/source/eri_call_bust_guide.png",
+  "canvas": {
+    "width": 846,
+    "height": 580
+  },
+  "status": "reference_crops_only",
+  "warning": "Flattened source; crops contain overlapping pixels and require cleanup/reconstruction before Cubism rigging.",
+  "layers": [
+    {
+      "name": "00_reference_flat",
+      "file": "00_reference_flat.png",
+      "role": "guide",
+      "canvas_box": [
+        0,
+        0,
+        846,
+        580
+      ],
+      "size": [
+        846,
+        580
+      ],
+      "needs_cleanup": false
+    },
+    {
+      "name": "01_body",
+      "file": "01_body.png",
+      "role": "body",
+      "canvas_box": [
+        210,
+        230,
+        635,
+        580
+      ],
+      "size": [
+        425,
+        350
+      ],
+      "needs_cleanup": true
+    },
+    {
+      "name": "02_back_hair",
+      "file": "02_back_hair.png",
+      "role": "back_hair",
+      "canvas_box": [
+        0,
+        0,
+        846,
+        580
+      ],
+      "size": [
+        846,
+        580
+      ],
+      "needs_cleanup": true
+    },
+    {
+      "name": "03_face",
+      "file": "03_face.png",
+      "role": "face",
+      "canvas_box": [
+        320,
+        75,
+        530,
+        270
+      ],
+      "size": [
+        210,
+        195
+      ],
+      "needs_cleanup": true
+    },
+    {
+      "name": "04_front_hair",
+      "file": "04_front_hair.png",
+      "role": "front_hair",
+      "canvas_box": [
+        245,
+        25,
+        605,
+        285
+      ],
+      "size": [
+        360,
+        260
+      ],
+      "needs_cleanup": true
+    },
+    {
+      "name": "05_eye_left",
+      "file": "05_eye_left.png",
+      "role": "eye",
+      "canvas_box": [
+        355,
+        145,
+        415,
+        205
+      ],
+      "size": [
+        60,
+        60
+      ],
+      "needs_cleanup": true
+    },
+    {
+      "name": "05_eye_right",
+      "file": "05_eye_right.png",
+      "role": "eye",
+      "canvas_box": [
+        430,
+        145,
+        490,
+        205
+      ],
+      "size": [
+        60,
+        60
+      ],
+      "needs_cleanup": true
+    },
+    {
+      "name": "06_mouth",
+      "file": "06_mouth.png",
+      "role": "mouth",
+      "canvas_box": [
+        395,
+        198,
+        452,
+        238
+      ],
+      "size": [
+        57,
+        40
+      ],
+      "needs_cleanup": true
+    },
+    {
+      "name": "07_bow_left",
+      "file": "07_bow_left.png",
+      "role": "accessory",
+      "canvas_box": [
+        245,
+        80,
+        340,
+        235
+      ],
+      "size": [
+        95,
+        155
+      ],
+      "needs_cleanup": true
+    },
+    {
+      "name": "07_bow_right",
+      "file": "07_bow_right.png",
+      "role": "accessory",
+      "canvas_box": [
+        505,
+        80,
+        600,
+        235
+      ],
+      "size": [
+        95,
+        155
+      ],
+      "needs_cleanup": true
+    },
+    {
+      "name": "08_left_sleeve",
+      "file": "08_left_sleeve.png",
+      "role": "body",
+      "canvas_box": [
+        205,
+        275,
+        390,
+        580
+      ],
+      "size": [
+        185,
+        305
+      ],
+      "needs_cleanup": true
+    },
+    {
+      "name": "08_right_sleeve",
+      "file": "08_right_sleeve.png",
+      "role": "body",
+      "canvas_box": [
+        455,
+        275,
+        640,
+        580
+      ],
+      "size": [
+        185,
+        305
+      ],
+      "needs_cleanup": true
+    },
+    {
+      "name": "09_hand_gesture_area",
+      "file": "09_hand_gesture_area.png",
+      "role": "gesture_guide",
+      "canvas_box": [
+        250,
+        420,
+        596,
+        580
+      ],
+      "size": [
+        346,
+        160
+      ],
+      "needs_cleanup": false
+    }
+  ],
+  "alignmentGuide": "layer-alignment-guide.png"
+}

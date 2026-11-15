@@ -15,7 +15,6 @@ const walkLeftLayout = require("../assets/walk-left-layout.json");
 const walkRightLayout = require("../assets/walk-right-layout.json");
 const turnRightLeftLayout = require("../assets/turn-right-left-layout.json");
 const turnLeftRightLayout = require("../assets/turn-left-right-layout.json");
-const eatLayout = require("../assets/eat-layout.json");
 
 let petWindow;
 let autoWalkTimer;
@@ -26,8 +25,6 @@ let idleUntil = 0;
 let expectedPosition;
 let turningUntil = 0;
 const turnDurationMs = 2250;
-let eatUntil = 0;
-const eatDurationMs = 4200;
 let fixedIdle = false;
 const baseDisplayWidth = Math.max(
   idleLayout.displayWidth,
@@ -35,11 +32,32 @@ const baseDisplayWidth = Math.max(
   walkRightLayout.displayWidth,
   turnRightLeftLayout.displayWidth,
   turnLeftRightLayout.displayWidth,
-  eatLayout.displayWidth,
 );
 const basePadding = idleLayout.padding;
 const baseWindowWidth = baseDisplayWidth + basePadding * 2;
 const baseWindowHeight = idleLayout.displayHeight + basePadding * 2;
+
+
+/* 她在说话时，桌宠停下来、站定，不打断 */
+let petSpeaking = false;
+
+function pollCallState() {
+  const req = http.get(
+    { host: "127.0.0.1", port: 8890, path: "/state", timeout: 800 },
+    (res) => {
+      let body = "";
+      res.on("data", (c) => { body += c; });
+      res.on("end", () => {
+        try {
+          const st = JSON.parse(body);
+          petSpeaking = st.status === "speaking";
+        } catch {}
+      });
+    },
+  );
+  req.on("error", () => { petSpeaking = false; });
+  req.on("timeout", () => { req.destroy(); petSpeaking = false; });
+}
 
 function shapeForLayout(layout) {
   const offsetX = Math.round((baseDisplayWidth - layout.displayWidth) / 2);
@@ -51,7 +69,6 @@ function layoutForMode(mode) {
   if (mode === "walk-right") return walkRightLayout;
   if (mode === "turn-right-left") return turnRightLeftLayout;
   if (mode === "turn-left-right") return turnLeftRightLayout;
-  if (mode === "eat") return eatLayout;
   return idleLayout;
 }
 
@@ -72,17 +89,9 @@ function startTurn(nextDirection) {
   setPetMode(nextDirection > 0 ? "turn-left-right" : "turn-right-left");
 }
 
-function playEatAction() {
-  if (!petWindow || petWindow.isDestroyed()) return;
-  eatUntil = Date.now() + eatDurationMs;
-  autoPauseUntil = eatUntil;
-  setPetMode("eat");
-}
-
 function parkInIdle(workArea, width) {
   if (!petWindow || petWindow.isDestroyed()) return;
   fixedIdle = true;
-  eatUntil = 0;
   autoPauseUntil = 0;
   idleUntil = 0;
   expectedPosition = undefined;
@@ -105,6 +114,10 @@ function startAutoWalk(workArea, width) {
   autoPauseUntil = Date.now() + 1000;
   autoWalkTimer = setInterval(() => {
     if (!petWindow || petWindow.isDestroyed()) return;
+    if (petSpeaking) {
+      setPetMode("idle");
+      return;
+    }
     const [x, y] = petWindow.getPosition();
 
     if (expectedPosition && (Math.abs(x - expectedPosition[0]) > 3 || Math.abs(y - expectedPosition[1]) > 3)) {
@@ -112,15 +125,6 @@ function startAutoWalk(workArea, width) {
       expectedPosition = undefined;
       idleUntil = Date.now() + 300;
       setPetMode("idle");
-    }
-
-    if (petMode === "eat") {
-      if (Date.now() >= eatUntil) {
-        setPetMode("idle");
-        idleUntil = Date.now() + 120;
-        autoPauseUntil = 0;
-      }
-      return;
     }
 
     if (fixedIdle) {
@@ -239,13 +243,13 @@ function openCallWindow() {
   ensureCallServer().catch(() => {});
 }
 
-function openChatWindow() {
+function openChatWindow(argvExtra = []) {
   const chatDir = path.join(app.getPath("documents"), "绘梨衣对话");
   const chatExe = path.join(chatDir, "runtime", "electron", "electron.exe");
   const env = { ...process.env };
   delete env.ELECTRON_RUN_AS_NODE;
   try {
-    const child = spawn(chatExe, [chatDir], {
+    const child = spawn(chatExe, [chatDir, ...argvExtra], {
       detached: true,
       stdio: "ignore",
       env,
@@ -311,10 +315,10 @@ function createPetWindow() {
 
   petWindow.setMenu(null);
   const contextMenu = Menu.buildFromTemplate([
-    { label: "播放卖萌动作", click: playEatAction },
     { label: "待机（右下角，不自动走动）", click: () => parkInIdle(workArea, width) },
     { label: "恢复自动行走", click: resumeAutoWalk },
-    { label: "打开绘梨衣对话", click: openChatWindow },
+    { label: "打开绘梨衣对话", click: () => openChatWindow() },
+    { label: "视频通话", click: () => openChatWindow(["--call"]) },
     { type: "separator" },
     { label: "退出", click: () => app.quit() },
   ]);
@@ -334,6 +338,7 @@ function createPetWindow() {
   petWindow.webContents.on("context-menu", showContextMenu);
 
   petWindow.loadFile(path.join(__dirname, "../src/index.html"));
+  setInterval(pollCallState, 800);
   petWindow.once("ready-to-show", () => {
     applyWindowShape();
     petWindow.show();

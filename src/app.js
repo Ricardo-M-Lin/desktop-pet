@@ -9,7 +9,6 @@ const sources = {
   "walk-right": "../assets/walk-right.webm",
   "turn-right-left": "../assets/turn-right-left.webm",
   "turn-left-right": "../assets/turn-left-right.webm",
-  eat: "../assets/eat.webm",
 };
 
 let currentState = "idle";
@@ -28,7 +27,7 @@ function setState(state) {
   // single video element can expose one transparent/black frame during load.
   next.pause();
   next.classList.remove("is-active");
-  next.loop = !(state.startsWith("turn-") || state === "eat");
+  next.loop = !state.startsWith("turn-");
   next.src = sources[state];
   next.load();
 
