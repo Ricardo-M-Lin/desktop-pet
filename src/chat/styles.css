@@ -2328,3 +2328,69 @@ input[type="range"] {
   padding: 4px 9px;
   font-size: 11.5px;
 }
+
+/* 星云：图例与空状态 */
+.nebula-legend {
+  position: absolute;
+  left: 10px;
+  top: 8px;
+  display: flex;
+  gap: 10px;
+  font-size: 10.5px;
+  color: #b3949c;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.nebula-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.nebula-legend i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  display: inline-block;
+  box-shadow: 0 0 6px currentColor;
+}
+
+.nebula-empty {
+  flex: 1;
+  min-height: 280px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  border-radius: 12px;
+  background: radial-gradient(circle at 50% 42%, rgba(90, 30, 50, 0.28), rgba(10, 5, 9, 0.92) 68%);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.nebula-empty-star {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #ff9aa4;
+  box-shadow: 0 0 18px 6px rgba(255, 120, 140, 0.45), 0 0 42px 14px rgba(255, 90, 120, 0.18);
+  animation: nebula-breathe 3.2s ease-in-out infinite;
+}
+
+@keyframes nebula-breathe {
+  0%, 100% { transform: scale(1); opacity: 0.85; }
+  50% { transform: scale(1.35); opacity: 1; }
+}
+
+.nebula-empty-text {
+  text-align: center;
+  font-size: 12.5px;
+  line-height: 1.9;
+  color: #c8a8b0;
+}
+
+.nebula-empty-text span {
+  font-size: 11.5px;
+  color: #8f737c;
+}

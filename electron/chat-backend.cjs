@@ -456,7 +456,7 @@ function createWindow() {
     if (items.length) Menu.buildFromTemplate(items).popup({ window: mainWindow });
   });
 
-  const query = shotMode ? { demo: shotMode } : undefined;
+  const query = shotMode ? { demo: shotMode } : (process.env.ERI_START_PANEL ? { panel: process.env.ERI_START_PANEL } : undefined);
   mainWindow.loadFile(path.join(APP_ROOT, "..", "src", "chat", "index.html"), query ? { query } : undefined);
 
     

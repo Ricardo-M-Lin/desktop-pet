@@ -1969,14 +1969,24 @@ function renderNebula(body) {
   const nodes = buildNebulaNodes(memoryData || {});
   if (!nodes.length) {
     body.innerHTML =
-      '<div class="mem-empty">还没有记忆星。聊天时说「我叫…」「我喜欢…」她会记下来，之后这里会慢慢亮起来。</div>';
+      '<div class="nebula-empty">' +
+      '<div class="nebula-empty-star"></div>' +
+      '<div class="nebula-empty-text">还没有记忆星<br /><span>聊天时说「我叫…」「我喜欢…」<br />她会记下来，这里会慢慢亮起来</span></div>' +
+      "</div>";
     return;
   }
 
   body.innerHTML =
-    '<div class="nebula-wrap"><canvas class="nebula-canvas" id="nebula-canvas"></canvas>' +
+    '<div class="nebula-wrap">' +
+    '<canvas class="nebula-canvas" id="nebula-canvas"></canvas>' +
+    '<div class="nebula-legend">' +
+    '<span><i style="background:#ff8f9b"></i>事实</span>' +
+    '<span><i style="background:#7fc4ff"></i>时间线</span>' +
+    '<span><i style="background:#ffbe6b"></i>未完成</span>' +
+    "</div>" +
     '<div class="nebula-tip" id="nebula-tip" hidden></div>' +
-    '<div class="nebula-detail" id="nebula-detail" hidden></div></div>';
+    '<div class="nebula-detail" id="nebula-detail" hidden></div>' +
+    "</div>";
 
   const wrap = body.querySelector(".nebula-wrap");
   const canvas = body.querySelector("#nebula-canvas");
@@ -1987,7 +1997,6 @@ function renderNebula(body) {
   let w = 0;
   let h = 0;
 
-  let resizeObserver = null;
   const resize = () => {
     w = wrap.clientWidth;
     h = wrap.clientHeight;
@@ -1999,19 +2008,11 @@ function renderNebula(body) {
   resize();
 
   const links = buildNebulaLinks(nodes);
-  const cols = Math.ceil(Math.sqrt(nodes.length));
-  nodes.forEach((n, i) => {
-    n.x = (i % cols) / Math.max(1, cols - 1) * w * 0.7 + w * 0.15 + (Math.random() - 0.5) * 20;
-    n.y = Math.floor(i / cols) / Math.max(1, Math.ceil(nodes.length / cols) - 1) * h * 0.65 + h * 0.12 + (Math.random() - 0.5) * 20;
-    n.vx = 0;
-    n.vy = 0;
-  });
+  const golden = Math.PI * (3 - Math.sqrt(5));
 
-  // 黄金角螺旋分布：稳定、均匀，不会因为物理模拟飞出去
   const layout = () => {
     const cx = w / 2;
     const cy = h / 2;
-    const golden = Math.PI * (3 - Math.sqrt(5));
     const maxR = Math.min(w, h) * 0.42;
     nodes.forEach((n, i) => {
       const t = (i + 0.5) / nodes.length;
@@ -2021,11 +2022,30 @@ function renderNebula(body) {
       n.y = cy + Math.sin(a) * r;
       n.x = Math.max(30, Math.min(w - 30, n.x));
       n.y = Math.max(30, Math.min(h - 30, n.y));
-      n.vx = 0;
-      n.vy = 0;
+      n.phase = Math.random() * Math.PI * 2;
     });
   };
   layout();
+
+  // 背景：星尘 + 星云气体
+  let bgStars = [];
+  const buildStars = () => {
+    bgStars = Array.from({ length: 110 }, () => ({
+      x: Math.random() * w,
+      y: Math.random() * h,
+      r: Math.random() * 1.1 + 0.25,
+      a: Math.random() * 0.5 + 0.15,
+      p: Math.random() * Math.PI * 2,
+      s: Math.random() * 0.8 + 0.3,
+    }));
+  };
+  buildStars();
+
+  const clouds = [
+    { x: 0.32, y: 0.34, r: 0.46, c: "120, 30, 58", a: 0.20 },
+    { x: 0.70, y: 0.62, r: 0.42, c: "44, 44, 116", a: 0.16 },
+    { x: 0.48, y: 0.82, r: 0.40, c: "148, 62, 44", a: 0.12 },
+  ];
 
   let zoom = 1;
   let panX = 0;
@@ -2034,6 +2054,9 @@ function renderNebula(body) {
   let selected = -1;
   let dragging = false;
   let dragStart = null;
+  let downPos = null;
+  let moved = false;
+  let pointer = { x: 0.5, y: 0.5 };
 
   const toWorld = (sx, sy) => ({
     x: (sx - w / 2 - panX) / zoom + w / 2,
@@ -2043,73 +2066,164 @@ function renderNebula(body) {
   const hitTest = (sx, sy) => {
     const p = toWorld(sx, sy);
     let best = -1;
-    let bestD = 14 / zoom;
+    let bestD = 16 / zoom;
     nodes.forEach((n, i) => {
       const d = Math.hypot(n.x - p.x, n.y - p.y);
-      if (d < bestD) { bestD = d; best = i; }
+      if (d < bestD) {
+        bestD = d;
+        best = i;
+      }
     });
     return best;
   };
 
-  const draw = () => {
+  const drawBackground = (t) => {
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, w, h);
 
-    const grad = ctx.createRadialGradient(w / 2, h / 2, 0, w / 2, h / 2, Math.max(w, h) * 0.6);
-    grad.addColorStop(0, "rgba(90, 28, 46, 0.30)");
-    grad.addColorStop(1, "rgba(12, 6, 10, 0)");
-    ctx.fillStyle = grad;
+    const base = ctx.createRadialGradient(w / 2, h / 2, 0, w / 2, h / 2, Math.max(w, h) * 0.75);
+    base.addColorStop(0, "#160a11");
+    base.addColorStop(1, "#07040a");
+    ctx.fillStyle = base;
     ctx.fillRect(0, 0, w, h);
+
+    for (const c of clouds) {
+      const px = (c.x - 0.5) * w * 0.04 * (pointer.x - 0.5) * 2;
+      const py = (c.y - 0.5) * h * 0.04 * (pointer.y - 0.5) * 2;
+      const cx = c.x * w + px;
+      const cy = c.y * h + py;
+      const rad = c.r * Math.min(w, h);
+      const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, rad);
+      g.addColorStop(0, `rgba(${c.c}, ${c.a})`);
+      g.addColorStop(1, `rgba(${c.c}, 0)`);
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, w, h);
+    }
+
+    for (const s of bgStars) {
+      const tw = 0.55 + Math.sin(t * s.s + s.p) * 0.45;
+      ctx.fillStyle = `rgba(255, 232, 238, ${(s.a * tw).toFixed(3)})`;
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  };
+
+  const drawLinks = (t) => {
+    for (const l of links) {
+      const a = nodes[l.a];
+      const b = nodes[l.b];
+      const g = ctx.createLinearGradient(a.x, a.y, b.x, b.y);
+      g.addColorStop(0, a.color + "00");
+      g.addColorStop(0.5, a.color + "55");
+      g.addColorStop(1, b.color + "00");
+      ctx.strokeStyle = g;
+      ctx.lineWidth = 0.6 + l.w * 0.9;
+      ctx.globalAlpha = 0.18 + l.w * 0.3;
+      ctx.beginPath();
+      ctx.moveTo(a.x, a.y);
+      ctx.lineTo(b.x, b.y);
+      ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
+
+    // 沿连线流动的光点
+    for (const l of links) {
+      if (l.w < 0.45) continue;
+      const a = nodes[l.a];
+      const b = nodes[l.b];
+      const k = ((t * 0.18 + (l.a + l.b) * 0.11) % 1);
+      const px = a.x + (b.x - a.x) * k;
+      const py = a.y + (b.y - a.y) * k;
+      ctx.fillStyle = "rgba(255, 216, 224, 0.65)";
+      ctx.beginPath();
+      ctx.arc(px, py, 1.1, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  };
+
+  const drawNode = (n, i, t) => {
+    const active = i === hover || i === selected;
+    const tw = 0.85 + Math.sin(t * 1.3 + (n.phase || i)) * 0.15;
+    const r = n.r * tw * (active ? 1.7 : 1);
+    const nx = n.x + Math.sin(t * 0.5 + i * 1.7) * 1.4;
+    const ny = n.y + Math.cos(t * 0.42 + i * 2.1) * 1.4;
+
+    const halo = ctx.createRadialGradient(nx, ny, 0, nx, ny, r * 7);
+    halo.addColorStop(0, n.color + "aa");
+    halo.addColorStop(0.3, n.color + "44");
+    halo.addColorStop(1, n.color + "00");
+    ctx.fillStyle = halo;
+    ctx.beginPath();
+    ctx.arc(nx, ny, r * 7, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 十字星芒
+    if (r >= 4 || active) {
+      const len = r * (active ? 5 : 3.6);
+      const grad = ctx.createLinearGradient(nx - len, ny, nx + len, ny);
+      grad.addColorStop(0, n.color + "00");
+      grad.addColorStop(0.5, n.color + (active ? "cc" : "77"));
+      grad.addColorStop(1, n.color + "00");
+      ctx.strokeStyle = grad;
+      ctx.lineWidth = active ? 1.2 : 0.8;
+      ctx.beginPath();
+      ctx.moveTo(nx - len, ny);
+      ctx.lineTo(nx + len, ny);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(nx, ny - len);
+      ctx.lineTo(nx, ny + len);
+      ctx.stroke();
+    }
+
+    ctx.fillStyle = active ? "#fff7f9" : n.color;
+    ctx.beginPath();
+    ctx.arc(nx, ny, r, 0, Math.PI * 2);
+    ctx.fill();
+
+    if (active) {
+      ctx.strokeStyle = "rgba(255, 226, 232, 0.85)";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.arc(nx, ny, r + 6, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+
+    if (i === selected) {
+      const text = n.label.length > 12 ? n.label.slice(0, 12) + "…" : n.label;
+      ctx.font = "11px 'Microsoft YaHei UI', sans-serif";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "bottom";
+      const tw2 = ctx.measureText(text).width;
+      ctx.fillStyle = "rgba(18, 9, 14, 0.86)";
+      ctx.beginPath();
+      ctx.roundRect(nx - tw2 / 2 - 6, ny - 26, tw2 + 12, 17, 6);
+      ctx.fill();
+      ctx.fillStyle = "#f7e6ea";
+      ctx.fillText(text, nx, ny - 12);
+    }
+  };
+
+  const draw = () => {
+    const t = Date.now() / 1000;
+    drawBackground(t);
 
     ctx.save();
     ctx.translate(w / 2 + panX, h / 2 + panY);
     ctx.scale(zoom, zoom);
     ctx.translate(-w / 2, -h / 2);
 
-    ctx.lineWidth = 0.7;
-    for (const l of links) {
-      const a = nodes[l.a];
-      const b = nodes[l.b];
-      ctx.strokeStyle = `rgba(228, 125, 140, ${0.05 + l.w * 0.18})`;
-      ctx.beginPath();
-      ctx.moveTo(a.x, a.y);
-      ctx.lineTo(b.x, b.y);
-      ctx.stroke();
-    }
-
-    const t = Date.now() / 1000;
-    nodes.forEach((n, i) => {
-      const pulse = 1 + Math.sin(t * 1.4 + i) * 0.12;
-      const active = i === hover || i === selected;
-      const r = n.r * pulse * (active ? 1.6 : 1);
-      const swayX = Math.sin(t * 0.5 + i * 1.7) * 1.6;
-      const swayY = Math.cos(t * 0.42 + i * 2.1) * 1.6;
-      const nx = n.x + swayX;
-      const ny = n.y + swayY;
-
-      const glow = ctx.createRadialGradient(nx, ny, 0, nx, ny, r * 5);
-      glow.addColorStop(0, n.color + "cc");
-      glow.addColorStop(0.35, n.color + "55");
-      glow.addColorStop(1, n.color + "00");
-      ctx.fillStyle = glow;
-      ctx.beginPath();
-      ctx.arc(nx, ny, r * 5, 0, Math.PI * 2);
-      ctx.fill();
-
-      ctx.fillStyle = active ? "#fff5f7" : n.color;
-      ctx.beginPath();
-      ctx.arc(nx, ny, r, 0, Math.PI * 2);
-      ctx.fill();
-
-      if (active) {
-        ctx.strokeStyle = "rgba(255, 220, 226, 0.8)";
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        ctx.arc(nx, ny, r + 5, 0, Math.PI * 2);
-        ctx.stroke();
-      }
-    });
+    drawLinks(t);
+    nodes.forEach((n, i) => drawNode(n, i, t));
     ctx.restore();
+
+    // 边缘压暗
+    const vig = ctx.createRadialGradient(w / 2, h / 2, Math.min(w, h) * 0.35, w / 2, h / 2, Math.max(w, h) * 0.72);
+    vig.addColorStop(0, "rgba(0,0,0,0)");
+    vig.addColorStop(1, "rgba(5, 2, 6, 0.55)");
+    ctx.fillStyle = vig;
+    ctx.fillRect(0, 0, w, h);
   };
 
   const loop = () => {
@@ -2118,7 +2232,10 @@ function renderNebula(body) {
   };
 
   const showTip = (i, sx, sy) => {
-    if (i < 0) { tip.hidden = true; return; }
+    if (i < 0) {
+      tip.hidden = true;
+      return;
+    }
     const n = nodes[i];
     tip.textContent = n.label.length > 40 ? n.label.slice(0, 40) + "…" : n.label;
     tip.hidden = false;
@@ -2127,7 +2244,10 @@ function renderNebula(body) {
   };
 
   const showDetail = (i) => {
-    if (i < 0) { detail.hidden = true; return; }
+    if (i < 0) {
+      detail.hidden = true;
+      return;
+    }
     const n = nodes[i];
     detail.hidden = false;
     detail.innerHTML =
@@ -2139,7 +2259,10 @@ function renderNebula(body) {
         type: n.type === "loop" ? "loop" : "fact",
         content: n.label,
       });
-      if (!result?.ok) { toast("删除失败。", "error"); return; }
+      if (!result?.ok) {
+        toast("删除失败。", "error");
+        return;
+      }
       memoryData = await ERI.listMemory();
       renderMemory();
     });
@@ -2149,6 +2272,7 @@ function renderNebula(body) {
     const rect = canvas.getBoundingClientRect();
     const sx = event.clientX - rect.left;
     const sy = event.clientY - rect.top;
+    pointer = { x: sx / Math.max(1, w), y: sy / Math.max(1, h) };
     if (dragging && dragStart) {
       panX += sx - dragStart.sx;
       panY += sy - dragStart.sy;
@@ -2159,9 +2283,6 @@ function renderNebula(body) {
     canvas.style.cursor = hover >= 0 ? "pointer" : "grab";
     showTip(hover, sx, sy);
   });
-
-  let downPos = null;
-  let moved = false;
 
   canvas.addEventListener("mousedown", (event) => {
     const rect = canvas.getBoundingClientRect();
@@ -2201,24 +2322,18 @@ function renderNebula(body) {
     canvas.style.cursor = hover >= 0 ? "pointer" : "grab";
   });
 
+  canvas.addEventListener("mouseleave", () => {
+    tip.hidden = true;
+    hover = -1;
+  });
+
   canvas.addEventListener("wheel", (event) => {
     event.preventDefault();
     zoom = Math.max(0.5, Math.min(2.4, zoom * (event.deltaY > 0 ? 0.92 : 1.08)));
   }, { passive: false });
 
-  if (window.ResizeObserver) {
-    resizeObserver = new ResizeObserver(() => {
-      resize();
-      layout();
-    });
-    resizeObserver.observe(wrap);
-  }
-
   loop();
-  nebulaCleanup = () => {
-    cancelAnimationFrame(nebulaFrame);
-    if (resizeObserver) resizeObserver.disconnect();
-  };
+  nebulaCleanup = () => cancelAnimationFrame(nebulaFrame);
 }
 
 function renderMemory() {
@@ -2331,6 +2446,10 @@ function setupMemoryPanel() {
   });
   document.addEventListener("keydown", (event) => {
     if (event.key === "Escape" && !modal.hidden) closeMemory();
+    if (event.ctrlKey && event.shiftKey && String(event.key).toLowerCase() === "m") {
+      event.preventDefault();
+      openMemory("nebula");
+    }
   });
   document.querySelectorAll(".memory-tab").forEach((btn) => {
     btn.addEventListener("click", () => {
@@ -2356,3 +2475,10 @@ function setupMemoryPanel() {
 setupAvatarMenu();
 setupMemoryPanel();
 
+setTimeout(() => {
+  try {
+    if (new URLSearchParams(location.search).get("panel") === "memory") {
+      openMemory("nebula");
+    }
+  } catch {}
+}, 900);
