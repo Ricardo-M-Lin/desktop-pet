@@ -822,6 +822,19 @@ function rememberShihai(content, source = "对话") {
 
 const SHIHAI_HINT = /(记住|记一下|别忘|我叫|我住|我是|我的生日|我喜欢|我讨厌|我害怕|我不喜欢|我在做|我在准备|我下周|我明天|我最近|我要去|我在学|我想学|我养了|我有只)/;
 
+ipcMain.handle("shihai:list", () => {
+  try {
+    const facts = readShihaiJson("facts.json").slice(-30).reverse();
+    const loops = readShihaiJson("open_loops.json").filter((x) => x && x.status === "open").slice(-10);
+    return {
+      facts: facts.map((f) => ({ content: String(f?.content || ""), created: String(f?.created || "") })),
+      loops: loops.map((l) => ({ content: String(l?.content || ""), due: String(l?.due || "") })),
+    };
+  } catch {
+    return { facts: [], loops: [] };
+  }
+});
+
 ipcMain.on("chat:start", (event, payload) => {
   const requestId = String(payload?.requestId || "");
   const api = resolveApi();

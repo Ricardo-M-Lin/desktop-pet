@@ -94,7 +94,6 @@
           <img src="../assets/eri-avatar.png" alt="绘梨衣" draggable="false" />
           <span class="presence" id="presence"></span>
         </div>
-        <span class="avatar-bubble" id="avatar-bubble" aria-live="polite"></span>
         <div class="identity-copy">
           <div class="identity-name">绘梨衣</div>
           <div class="identity-status">
@@ -120,6 +119,20 @@
           </button>
         </div>
       </header>
+
+      <div class="avatar-menu" id="avatar-menu" hidden>
+        <div class="avatar-menu-view" id="avatar-menu-main">
+          <button class="avatar-menu-item" type="button" data-action="call">视频通话</button>
+          <button class="avatar-menu-item" type="button" data-action="persona">更换性格</button>
+          <button class="avatar-menu-item" type="button" data-action="memory">记忆</button>
+          <button class="avatar-menu-item" type="button" data-action="voice" id="avatar-menu-voice">静音</button>
+          <button class="avatar-menu-item" type="button" data-action="settings">设置</button>
+        </div>
+        <div class="avatar-menu-view" id="avatar-menu-memory" hidden>
+          <div class="avatar-menu-head">她记住的事</div>
+          <div class="avatar-menu-list" id="avatar-menu-list"></div>
+        </div>
+      </div>
 
       <main class="scroll" id="scroll">
         <section class="hero" id="hero">

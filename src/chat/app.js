@@ -1856,58 +1856,104 @@ boot().catch((error) => {
 });
 
 /* ------------------------------------------------------------------ */
-/* 头像的小互动                                                        */
+/* 头像菜单                                                            */
 /* ------------------------------------------------------------------ */
 
-function setupAvatarPlay() {
+function setupAvatarMenu() {
   const avatar = document.getElementById("identity-avatar");
-  const bubble = document.getElementById("avatar-bubble");
-  if (!avatar || !bubble) return;
+  const menu = document.getElementById("avatar-menu");
+  const mainView = document.getElementById("avatar-menu-main");
+  const memView = document.getElementById("avatar-menu-memory");
+  const memList = document.getElementById("avatar-menu-list");
+  const voiceBtn = document.getElementById("avatar-menu-voice");
+  if (!avatar || !menu || !mainView || !memView || !memList) return;
 
-  const CALM = ["……", "在。", "嗯？", "别戳。", "痒。", "看到了。"];
-  const ANGRY = ["再戳就躲起来了。", "说了别戳。", "……（把脸转开）", "不理你了。"];
-  let count = 0;
-  let timer = null;
-  let hideTimer = null;
-
-  const say = (text, ms = 2600) => {
-    bubble.textContent = text;
-    bubble.classList.add("show");
-    clearTimeout(hideTimer);
-    hideTimer = setTimeout(() => bubble.classList.remove("show"), ms);
+  const close = () => {
+    menu.hidden = true;
+    mainView.hidden = false;
+    memView.hidden = true;
   };
 
-  avatar.addEventListener("click", () => {
-    count += 1;
-    clearTimeout(timer);
-    timer = setTimeout(() => { count = 0; }, 3000);
+  const refreshVoiceLabel = () => {
+    if (voiceBtn) voiceBtn.textContent = voiceOn() ? "静音" : "声音开";
+  };
 
-    avatar.classList.remove("poke", "poke-strong");
-    void avatar.offsetWidth;
-    if (count >= 5) {
-      avatar.classList.add("poke-strong");
-      say(ANGRY[Math.floor(Math.random() * ANGRY.length)], 3200);
-      count = 0;
+  avatar.addEventListener("click", (event) => {
+    event.stopPropagation();
+    if (menu.hidden) {
+      menu.hidden = false;
+      mainView.hidden = false;
+      memView.hidden = true;
+      refreshVoiceLabel();
     } else {
-      avatar.classList.add("poke");
-      say(CALM[Math.floor(Math.random() * CALM.length)]);
+      close();
     }
   });
 
-  avatar.addEventListener("dblclick", () => {
-    try {
-      if (ERI && ERI.openCall) ERI.openCall();
-      say("想见你。", 1400);
-    } catch {}
+  document.addEventListener("click", (event) => {
+    if (menu.hidden) return;
+    if (menu.contains(event.target) || avatar.contains(event.target)) return;
+    close();
   });
 
-  avatar.addEventListener("keydown", (event) => {
-    if (event.key === "Enter" || event.key === " ") {
-      event.preventDefault();
-      avatar.click();
-    }
+  menu.querySelectorAll("[data-action]").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      const action = btn.dataset.action;
+      if (action === "call") {
+        close();
+        try { ERI.openCall(); } catch {}
+        return;
+      }
+      if (action === "persona") {
+        close();
+        openSettings("persona");
+        return;
+      }
+      if (action === "settings") {
+        close();
+        openSettings("connection");
+        return;
+      }
+      if (action === "voice") {
+        const next = !voiceOn();
+        if (!next) stopSpeech();
+        const result = await ERI.saveSettings({ voiceEnabled: next });
+        if (!result?.ok) {
+          toast(result?.error || "切换失败。", "error");
+          return;
+        }
+        state.settings = result.settings;
+        updateVoiceChip();
+        refreshVoiceLabel();
+        return;
+      }
+      if (action === "memory") {
+        mainView.hidden = true;
+        memView.hidden = false;
+        memList.innerHTML = '<div class="mem-empty">读取中…</div>';
+        try {
+          const data = await ERI.listMemory();
+          const items = [];
+          for (const f of data?.facts || []) {
+            items.push(
+              `<div class="mem-item">${escapeHtml(f.content)}<br /><span class="mem-empty">${escapeHtml(
+                (f.created || "").slice(0, 10),
+              )}</span></div>`,
+            );
+          }
+          for (const l of data?.loops || []) {
+            items.push(`<div class="mem-item">· ${escapeHtml(l.content)}（未完成）</div>`);
+          }
+          memList.innerHTML = items.length
+            ? items.join("")
+            : '<div class="mem-empty">还没记住什么。聊天时说「我叫…」「我喜欢…」她会记下来。</div>';
+        } catch {
+          memList.innerHTML = '<div class="mem-empty">读取失败。</div>';
+        }
+      }
+    });
   });
 }
 
-setupAvatarPlay();
+setupAvatarMenu();
 
