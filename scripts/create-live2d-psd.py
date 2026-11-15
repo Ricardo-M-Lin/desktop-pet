@@ -152,7 +152,10 @@ def make_layer_record(name: str, width: int, height: int, rgba: bytes, hidden: b
     # In PSD files bit 1 is set for a hidden layer (Cubism and ag-psd follow
     # this convention even though the format notes describe it as the
     # visibility bit).
-    out += bytes([opacity, 0, 0x08 | (2 if hidden else 0), 0])
+    # Keep the flag byte minimal: bit 1 is the hidden-layer bit in common PSD
+    # readers.  Bit 3 is optional and can make strict importers reject a
+    # hand-written file when no additional lock information follows.
+    out += bytes([opacity, 0, (2 if hidden else 0), 0])
     extra = pascal_name(name)
     out += struct.pack(">I", 4 + 4 + len(extra))
     out += struct.pack(">I", 0)  # layer mask data

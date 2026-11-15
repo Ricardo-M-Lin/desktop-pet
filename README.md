@@ -1,5 +1,12 @@
 # 桌宠项目
 
+## 下载
+
+- 安装包：[GitHub Releases](https://github.com/linjunxin222/desktop-pet/releases/latest)（Windows，约 132 MB）
+- 网页：[https://linjunxin222.github.io/desktop-pet/](https://linjunxin222.github.io/desktop-pet/)
+
+> 语音通话依赖本机 GPT-SoVITS 服务（模型 GB 级，不随安装包分发）；文字对话、记忆、桌宠动作换电脑即装即用。
+
 这是同一角色陪伴系统的 Windows 桌面原型，使用 Electron 实现。
 
 ## 当前交互

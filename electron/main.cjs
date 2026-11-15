@@ -7,6 +7,8 @@ const { app, BrowserWindow, Menu, screen, dialog } = require("electron");
 // ACL does not grant AppContainer read access. Keep the renderer unsandboxed
 // so the local prototype can start without changing system ACLs.
 app.commandLine.appendSwitch("no-sandbox");
+// 让网页上的「启动桌宠」按钮能唤起本机应用
+try { app.setAsDefaultProtocolClient("eripet"); } catch {}
 // Give this Electron app its own user-data/instance-lock namespace so other
 // Electron applications on the desktop cannot block the pet from starting.
 app.setName("绘梨衣桌宠");
@@ -339,13 +341,24 @@ function createPetWindow() {
 if (!app.requestSingleInstanceLock()) {
   app.quit();
 } else {
-  app.on("second-instance", () => {
-    petWindow?.show();
-    petWindow?.focus();
+  app.on("second-instance", (_event, argv) => {
+    const viaProtocol = Array.isArray(argv) && argv.some((a) => String(a).startsWith("eripet://"));
+    if (petWindow) {
+      petWindow.show();
+      petWindow.focus();
+      if (viaProtocol) {
+        try { openChatWindow(false); } catch {}
+      }
+    }
   });
   app.whenReady().then(() => {
     createPetWindow();
     // 调试入口：--chat 直接开对话窗，--call 再开视频通话
+    // 从网页点「启动桌宠」时，系统会用 eripet:// 唤起应用
+    const viaProtocol = process.argv.some((a) => String(a).startsWith("eripet://"));
+    if (viaProtocol) {
+      setTimeout(() => { try { openChatWindow(false); } catch {} }, 900);
+    }
     if (process.argv.includes("--chat") || process.argv.includes("--call")) {
       setTimeout(() => {
         openChatWindow(process.argv.includes("--call"));

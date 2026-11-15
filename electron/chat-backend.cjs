@@ -632,7 +632,7 @@ function abortAllRequests() {
 /* ------------------------------------------------------------------ */
 
 const CALL_SERVER_PORT = 8890;
-const CALL_DIR = "C:\\Users\\linjunxin\\Documents\\GPT-SoVITS";
+const CALL_DIR = process.env.ERI_CALL_DIR || "C:\\Users\\linjunxin\\Documents\\GPT-SoVITS";
 let callWindow = null;
 let callWatchdog = null;
 
@@ -755,8 +755,15 @@ function sendToRenderer(channel, payload) {
 /* 识海：长期自我记忆                                                  */
 /* ------------------------------------------------------------------ */
 
-const SHIHAI_DIR = "C:\\Users\\linjunxin\\Documents\\绘梨衣对话\\识海";
+const LEGACY_SHIHAI = path.join(app.getPath("documents"), "绘梨衣对话", "识海");
+const SHIHAI_DIR =
+  process.env.ERI_MEMORY_DIR ||
+  (fs.existsSync(LEGACY_SHIHAI) ? LEGACY_SHIHAI : path.join(app.getPath("userData"), "识海"));
 const SHIHAI_FILES = ["self.md", "owner.md", "timeline.md", "canon.md"];
+
+function ensureShihaiDir() {
+  try { fs.mkdirSync(SHIHAI_DIR, { recursive: true }); } catch {}
+}
 
 function readShihai(name) {
   try {
@@ -1449,6 +1456,7 @@ async function runSmoke(kind = "plain") {
 /* ------------------------------------------------------------------ */
 
 function migrateSettings() {
+  ensureShihaiDir();
   try {
     if (fs.existsSync(SETTINGS_FILE)) return;
     const oldFile = path.join(app.getPath("appData"), "EriDesktopChat", "settings.json");

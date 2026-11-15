@@ -184,6 +184,40 @@ def build_psd(helper, width: int, height: int, layers):
     return header + color_mode + resources + struct.pack(">I", len(layer_mask)) + layer_mask + composite
 
 
+def build_psd_raw(helper, width: int, height: int, layers):
+    """Write an uncompressed PSD variant for readers with strict PackBits support."""
+    channels = (0, 1, 2, -1)
+    records = bytearray()
+    pixel_data = bytearray()
+    for name, rgba, hidden in layers:
+        records.extend(struct.pack(">iiiiH", 0, 0, height, width, len(channels)))
+        for channel in channels:
+            data = bytes(len(rgba)) if hidden else helper.channel_bytes(rgba, channel)
+            records.extend(struct.pack(">hI", channel, 2 + len(data)))
+        records.extend(b"8BIMnorm")
+        records.extend(bytes([255, 0, (2 if hidden else 0), 0]))
+        name_bytes = helper.pascal_name(name)
+        records.extend(struct.pack(">I", 8 + len(name_bytes)))
+        records.extend(struct.pack(">I", 0))
+        records.extend(struct.pack(">I", 0))
+        records.extend(name_bytes)
+        for channel in channels:
+            data = bytes(len(rgba)) if hidden else helper.channel_bytes(rgba, channel)
+            pixel_data.extend(struct.pack(">H", 0))
+            pixel_data.extend(data)
+    info = struct.pack(">h", -len(layers)) + bytes(records) + bytes(pixel_data)
+    info += b"\0" * ((4 - len(info) % 4) % 4)
+    layer_mask = struct.pack(">I", len(info)) + info + struct.pack(">I", 0)
+
+    header = b"8BPS" + struct.pack(">H", 1) + b"\0" * 6
+    header += struct.pack(">HIIHH", 4, height, width, 8, 3)
+    color_mode = struct.pack(">I", 0)
+    resources = struct.pack(">I", 0)
+    guide = layers[0][1]
+    composite = struct.pack(">H", 0) + b"".join(helper.channel_bytes(guide, c) for c in channels)
+    return header + color_mode + resources + struct.pack(">I", len(layer_mask)) + layer_mask + composite
+
+
 def main() -> None:
     helper = load_png_helpers()
     width, height, rgba = helper.read_rgba_png(SOURCE)
@@ -193,7 +227,9 @@ def main() -> None:
         helper_path = OUT_DIR / f"{name}.png"
         write_rgba_png(helper_path, width, height, layer)
     OUT_PSD.write_bytes(build_psd(helper, width, height, layers))
-    print(f"wrote reconstructed PSD: {OUT_PSD} ({width}x{height}, {len(layers)} layers)")
+    raw_path = OUT_DIR / "eri_call_bust_reconstructed_raw.psd"
+    raw_path.write_bytes(build_psd_raw(helper, width, height, layers))
+    print(f"wrote reconstructed PSDs: {OUT_PSD} and {raw_path} ({width}x{height}, {len(layers)} layers)")
 
 
 if __name__ == "__main__":

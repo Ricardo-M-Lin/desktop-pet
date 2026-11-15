@@ -19,7 +19,9 @@
 
 - 已生成 `.live2d/reconstructed/eri_call_bust_reconstructed.psd`，846×580、11 个图层，保留原图作为隐藏参考层。
 - 该文件是由合并 PNG 重建的第一版，眼睛、嘴和脸部底层仍需要在 Cubism 导入后检查遮挡边缘。
-- Cubism 导入验证尚未完成；当前 `.live2d/eri_call_bust_skeleton.cmo3` 没有被覆盖。
+- 发现压缩版 PSD 的 PackBits 记录对 Cubism 不够兼容，已另生成 `.live2d/reconstructed/eri_call_bust_reconstructed_raw.psd`（无压缩通道数据），并用 FFmpeg 验证可以正常解析和还原合并图。
+- 已把图层标志位改成最简 PSD 写法并重新生成；FFmpeg 仍能正常解析。Cubism 打开后仍显示空文档，说明它对手写 PSD 的图层结构还有额外兼容要求。
+- Cubism 的正式图层导入验证仍未完成；当前 `.live2d/eri_call_bust_skeleton.cmo3` 没有被覆盖。
 
 ### 重要限制
 
@@ -123,3 +125,5 @@
 - 托盘只保留桌宠一个；对话窗关掉只是隐藏
 - 头像交互：点击弹出快捷菜单；「记忆」打开识海面板：星云图（星尘/星云气体/十字星芒/流动连线，可拖动缩放、悬停查看、点开删除），Ctrl+Shift+M 快捷打开
 - 她在说话时桌宠停止走动，站定看她说完
+
+- 2026-11-15 晚：对 ri_call_bust_reconstructed_raw_positive.psd（正图层计数变体）做了 Cubism 导入验证，仍未打开为可编辑模型；原 .cmo3 未修改。
