@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>绘梨衣桌宠 · 下载</title>
+    <meta name="description" content="绘梨衣桌面陪伴：桌宠、对话、视频通话、记忆星云。Windows 安装包下载。" />
+    <link rel="icon" href="./assets/icon.png" />
+    <style>
+      :root {
+        --bg: #0c070b;
+        --panel: rgba(32, 18, 25, 0.72);
+        --line: rgba(228, 105, 115, 0.22);
+        --text: #f4e7ea;
+        --muted: #b0939b;
+        --accent: #e46973;
+        --accent-soft: #f2a6ad;
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body {
+        min-height: 100vh;
+        background:
+          radial-gradient(900px 600px at 18% 12%, rgba(120, 30, 55, 0.35), transparent 60%),
+          radial-gradient(800px 600px at 82% 30%, rgba(50, 40, 110, 0.22), transparent 62%),
+          radial-gradient(900px 700px at 50% 100%, rgba(150, 60, 45, 0.14), transparent 65%),
+          var(--bg);
+        color: var(--text);
+        font-family: "Microsoft YaHei UI", "Microsoft YaHei", system-ui, sans-serif;
+        line-height: 1.7;
+      }
+      .wrap { max-width: 1060px; margin: 0 auto; padding: 48px 22px 80px; }
+
+      header.hero {
+        display: grid;
+        grid-template-columns: 1.2fr 0.8fr;
+        gap: 32px;
+        align-items: center;
+        margin-bottom: 54px;
+      }
+      .eyebrow {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 999px;
+        border: 1px solid var(--line);
+        color: var(--accent-soft);
+        font-size: 12px;
+        letter-spacing: 0.08em;
+        margin-bottom: 16px;
+      }
+      h1 { font-size: 42px; line-height: 1.25; margin: 0 0 14px; letter-spacing: 0.02em; }
+      h1 span { color: var(--accent-soft); }
+      .lede { color: var(--muted); font-size: 15.5px; max-width: 540px; margin-bottom: 26px; }
+
+      .actions { display: flex; gap: 12px; flex-wrap: wrap; }
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 13px 22px;
+        border-radius: 12px;
+        border: 1px solid transparent;
+        font-size: 15px;
+        cursor: pointer;
+        text-decoration: none;
+        transition: transform 0.15s ease, filter 0.15s ease, background 0.15s ease;
+      }
+      .btn:hover { transform: translateY(-1px); }
+      .btn-primary {
+        background: linear-gradient(180deg, #f2a6ad, #d95762);
+        color: #2a0d13;
+        font-weight: 600;
+        box-shadow: 0 12px 30px rgba(214, 80, 92, 0.28);
+      }
+      .btn-primary:hover { filter: brightness(1.05); }
+      .btn-ghost {
+        background: rgba(255, 255, 255, 0.04);
+        border-color: rgba(255, 255, 255, 0.12);
+        color: var(--text);
+      }
+      .btn-ghost:hover { background: rgba(255, 255, 255, 0.08); }
+
+      .hint { margin-top: 14px; font-size: 12.5px; color: #8e737c; min-height: 20px; }
+      .hint.warn { color: #f0b98a; }
+
+      .stage {
+        position: relative;
+        height: 360px;
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+      }
+      .stage .glow {
+        position: absolute;
+        inset: 12% 10% 0 10%;
+        background: radial-gradient(circle at 50% 55%, rgba(228, 105, 115, 0.25), transparent 62%);
+        filter: blur(12px);
+      }
+      .stage video {
+        position: relative;
+        height: 340px;
+        object-fit: contain;
+        filter: drop-shadow(0 22px 40px rgba(0, 0, 0, 0.55));
+      }
+
+      section { margin-bottom: 46px; }
+      h2 { font-size: 20px; margin: 0 0 18px; letter-spacing: 0.04em; }
+      h2::before {
+        content: "";
+        display: inline-block;
+        width: 6px; height: 6px;
+        border-radius: 50%;
+        background: var(--accent);
+        margin-right: 10px;
+        vertical-align: 3px;
+        box-shadow: 0 0 10px rgba(228, 105, 115, 0.8);
+      }
+
+      .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; }
+      .card {
+        background: var(--panel);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 14px;
+        padding: 16px 18px;
+      }
+      .card h3 { margin: 0 0 6px; font-size: 15px; }
+      .card p { margin: 0; font-size: 13px; color: var(--muted); }
+
+      .note {
+        border-left: 2px solid var(--line);
+        padding: 10px 14px;
+        background: rgba(255, 255, 255, 0.02);
+        border-radius: 0 10px 10px 0;
+        font-size: 13px;
+        color: var(--muted);
+      }
+      .note b { color: var(--text); font-weight: 600; }
+
+      footer { color: #7c646c; font-size: 12px; border-top: 1px solid rgba(255, 255, 255, 0.06); padding-top: 18px; }
+      footer a { color: #b5868f; }
+
+      @media (max-width: 820px) {
+        header.hero { grid-template-columns: 1fr; }
+        .stage { height: 260px; order: -1; }
+        .stage video { height: 240px; }
+        h1 { font-size: 32px; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header class="hero">
+        <div>
+          <span class="eyebrow">WINDOWS · 桌面陪伴</span>
+          <h1>把<span>绘梨衣</span>放在桌面上</h1>
+          <p class="lede">
+            一个会走动、会说话、会记住你的桌面陪伴。点一下头像能开关声音、翻她的记忆；
+            打开对话窗可以聊天，也可以开视频通话——她说话时桌宠会停下来看着你。
+          </p>
+          <div class="actions">
+            <a class="btn btn-primary" id="download" href="https://github.com/linjunxin222/desktop-pet/releases/latest">
+              下载安装包（Windows）
+            </a>
+            <button class="btn btn-ghost" id="launch" type="button">在网页启动桌宠</button>
+          </div>
+          <div class="hint" id="hint">安装包约 132 MB，含桌宠本体、对话窗与记忆星云。</div>
+        </div>
+        <div class="stage">
+          <div class="glow"></div>
+          <video src="./assets/idle.webm" poster="./assets/idle-poster.png" autoplay muted loop playsinline></video>
+        </div>
+      </header>
+
+      <section>
+        <h2>安装后能做什么</h2>
+        <div class="grid">
+          <div class="card">
+            <h3>桌宠</h3>
+            <p>待机 / 走动 / 转身 / 吃东西，右键菜单打开对话或视频通话，她在说话时会站定。</p>
+          </div>
+          <div class="card">
+            <h3>对话与通话</h3>
+            <p>对话窗跑在同一个进程里；通话窗点「开始通话」才开麦，挂断释放麦克风。</p>
+          </div>
+          <div class="card">
+            <h3>记忆星云</h3>
+            <p>她说记住的事会变成星云里的星星，可悬停查看、点开删除，Ctrl+Shift+M 直接打开。</p>
+          </div>
+          <div class="card">
+            <h3>头像菜单</h3>
+            <p>点头像：视频通话 / 更换性格 / 记忆 / 声音 / 设置，和底部 chip 保持同步。</p>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h2>「在网页启动桌宠」怎么用</h2>
+        <div class="note">
+          先装桌面版并**至少启动过一次**，之后点这个按钮，浏览器会通过 <b>eripet://</b> 唤起本机应用，
+          和你从桌面双击启动完全一样。<br />
+          没装的话点按钮不会有反应，按提示下载安装包即可。
+        </div>
+      </section>
+
+      <section>
+        <h2>关于语音</h2>
+        <div class="note">
+          桌宠、对话、记忆星云、头像互动、视频通话<b>界面</b>都随安装包提供，换电脑即装即用。<br />
+          但她的<b>声音</b>来自本机的 GPT-SoVITS 语音服务（模型体积在 GB 级、依赖显卡），
+          没有随安装包分发。所以在新电脑上：<br />
+          · 文字对话、记忆、桌宠动作 = <b>开箱即用</b><br />
+          · 语音通话 = 需要另外部署语音服务，或在设置里配置支持语音的云端接口
+        </div>
+      </section>
+
+      <footer>
+        绘梨衣桌宠 · <a href="https://github.com/linjunxin222/desktop-pet">GitHub 仓库</a> ·
+        角色素材仅用于个人桌面陪伴，请勿商用传播。
+      </footer>
+    </div>
+
+    <script>
+      (function () {
+        var hint = document.getElementById("hint");
+        var launch = document.getElementById("launch");
+        var download = document.getElementById("download");
+
+        // 优先直链到最近一次 Release 的安装包
+        fetch("https://api.github.com/repos/linjunxin222/desktop-pet/releases/latest")
+          .then(function (r) { return r.ok ? r.json() : null; })
+          .then(function (data) {
+            if (!data || !data.assets || !data.assets.length) return;
+            var asset = data.assets.find(function (a) { return /\.exe$/i.test(a.name); });
+            if (asset) {
+              download.href = asset.browser_download_url;
+              download.textContent = "下载安装包 v" + String(data.tag_name || "").replace(/^v/, "");
+            }
+          })
+          .catch(function () {});
+
+        launch.addEventListener("click", function () {
+          var before = Date.now();
+          hint.className = "hint";
+          hint.textContent = "正在唤起本机应用…";
+          try { window.location.href = "eripet://launch"; } catch (e) {}
+          setTimeout(function () {
+            if (Date.now() - before < 4000) {
+              hint.className = "hint warn";
+              hint.innerHTML =
+                '没反应？说明这台电脑还没安装（或安装后没启动过）。先 <a href="' +
+                download.href + '">下载安装包</a>。';
+            } else {
+              hint.className = "hint";
+              hint.textContent = "已唤起，去桌面看看吧。";
+            }
+          }, 1600);
+        });
+      })();
+    </script>
+  </body>
+</html>
