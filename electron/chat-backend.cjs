@@ -459,7 +459,7 @@ function createWindow() {
   const query = shotMode
     ? { demo: shotMode }
     : process.env.ERI_START_PANEL
-      ? { panel: process.env.ERI_START_PANEL, ...(process.env.ERI_START_GAME ? { game: process.env.ERI_START_GAME } : {}) }
+      ? { panel: process.env.ERI_START_PANEL, ...(process.env.ERI_START_GAME ? { game: process.env.ERI_START_GAME } : {}), ...(process.env.ERI_START_RULES ? { rules: '1' } : {}), ...(process.env.ERI_START_AUTO ? { auto: '1' } : {}) }
       : undefined;
   mainWindow.loadFile(path.join(APP_ROOT, "..", "src", "chat", "index.html"), query ? { query } : undefined);
 

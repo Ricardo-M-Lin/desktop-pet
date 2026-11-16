@@ -2483,8 +2483,11 @@ setTimeout(() => {
     if (panel === "games") {
       openGames();
       const game = params.get("game");
-      if (game === "fight") startFight();
-      if (game === "notebook") startNotebook();
+      if (game && params.get("rules") === "1") { showRules(game, "start"); if (params.get("auto") === "1") setTimeout(hideRules, 1200); }
+      else {
+        if (game === "fight") startFight();
+        if (game === "notebook") startNotebook();
+      }
     }
   } catch {}
 }, 900);

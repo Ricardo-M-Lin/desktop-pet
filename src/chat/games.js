@@ -31,6 +31,7 @@ const FIGHT = {
   lastTime: 0,
   superP1: 0,
   superP2: 0,
+  paused: false,
 };
 
 const NOTEBOOK = {
@@ -146,7 +147,7 @@ function startFight() {
   FIGHT.lastTime = performance.now();
 
   bindFightKeys();
-  statusHint("← → 移动　↑ 跳　J 轻拳　K 重拳　L 踢　空格 防御　U 必杀");
+  statusHint("三局两胜 · 打空她的血条 · 按 H 看规则");
   FIGHT.raf = requestAnimationFrame(fightLoop);
 }
 
@@ -261,6 +262,12 @@ function resetRound() {
 
 function fightLoop(now) {
   if (!FIGHT.running) return;
+  if (FIGHT.paused) {
+    FIGHT.lastTime = now;
+    drawFight();
+    FIGHT.raf = requestAnimationFrame(fightLoop);
+    return;
+  }
   const dt = Math.min(48, now - FIGHT.lastTime);
   FIGHT.lastTime = now;
 
@@ -796,6 +803,82 @@ function flashNotebook(kind) {
   el.classList.add(kind === "ok" ? "flash-ok" : kind === "danger" ? "flash-danger" : "flash-bad");
 }
 
+
+
+/* ---------------------------- 规则说明 ---------------------------- */
+
+const GAME_RULES = {
+  fight: {
+    title: "街头对决 · 玩法",
+    html:
+      "<p>三局两胜。每局 60 秒，时间到血多的一方赢。</p>" +
+      "<ul>" +
+      "<li><b>← →</b> 移动　<b>↑</b> 跳</li>" +
+      "<li><b>J</b> 轻拳（快、伤害低）　<b>K</b> 重拳（慢、伤害高）　<b>L</b> 踢（距离远）</li>" +
+      "<li><b>空格</b> 防御：伤害只吃四分之一，但打不出连击</li>" +
+      "<li><b>U</b> 必杀「言灵 · 审判」：右上角金色槽满了才能放，全屏闪白、伤害 26</li>" +
+      "<li>打中/被打中都会攒必杀槽；连击会在左边显示 HIT 数</li>" +
+      "<li>她血量低于 35% 会变凶，爱出重拳；你一直防御她会用踢克制</li>" +
+      "<li>按 <b>H</b> 随时看规则，按 <b>R</b> 重开</li>" +
+      "</ul>",
+  },
+  notebook: {
+    title: "小本子 · 玩法",
+    html:
+      "<p>她不能开口，只能把话写在便签上递给你。</p>" +
+      "<ul>" +
+      "<li>每局 5 张字条，你有 <b>3 颗心</b></li>" +
+      "<li>她写半句，你从三张词卡里挑一句回她</li>" +
+      "<li>选对了她会多写一句，并记下这张字条</li>" +
+      "<li>选错了掉一颗心；选到<b>危险词</b>会触发「审判」，画面变红</li>" +
+      "<li>心掉光或者 5 张写完，这局就结束</li>" +
+      "<li>按 <b>H</b> 随时看规则</li>" +
+      "</ul>",
+  },
+};
+
+let pendingGame = null;
+let pendingMode = "start";
+
+function showRules(game, mode) {
+  const box = document.getElementById("games-rules");
+  const title = document.getElementById("rules-title");
+  const body = document.getElementById("rules-body");
+  const startBtn = document.getElementById("rules-start");
+  const spec = GAME_RULES[game];
+  if (!box || !spec) return;
+  pendingGame = game;
+  pendingMode = mode;
+  if (title) title.textContent = spec.title;
+  if (body) body.innerHTML = spec.html;
+  if (startBtn) startBtn.textContent = mode === "resume" ? "继续" : "开始";
+  box.hidden = false;
+  document.querySelector(".games-shell")?.classList.add("rules-open");
+  if (game === "fight") FIGHT.paused = true;
+}
+
+function hideRules() {
+  const box = document.getElementById("games-rules");
+  if (box) box.hidden = true;
+  document.querySelector(".games-shell")?.classList.remove("rules-open");
+  if (pendingGame === "fight" && pendingMode === "resume") FIGHT.paused = false;
+  if (pendingMode === "start") {
+    const game = pendingGame;
+    pendingGame = null;
+    if (game === "fight") startFight();
+    if (game === "notebook") startNotebook();
+  }
+  pendingGame = null;
+  pendingMode = "start";
+}
+
+function toggleRules(game) {
+  const box = document.getElementById("games-rules");
+  if (!box) return;
+  if (box.hidden) showRules(game, "resume");
+  else hideRules();
+}
+
 /* ---------------------------- 初始化 ---------------------------- */
 
 function setupGames() {
@@ -818,9 +901,23 @@ function setupGames() {
   document.querySelectorAll("[data-game]").forEach((card) => {
     card.addEventListener("click", () => {
       const game = card.dataset.game;
-      if (game === "fight") startFight();
-      if (game === "notebook") startNotebook();
+      showRules(game, "start");
     });
+  });
+
+  document.getElementById("rules-start")?.addEventListener("click", hideRules);
+  document.getElementById("fight-rules-btn")?.addEventListener("click", () => toggleRules("fight"));
+  document.getElementById("notebook-rules-btn")?.addEventListener("click", () => toggleRules("notebook"));
+
+  document.addEventListener("keydown", (event) => {
+    if (modal.hidden) return;
+    const k = event.key.toLowerCase();
+    if (k === "h") {
+      const stageVisible = !document.getElementById("games-stage").hidden;
+      const nbVisible = !document.getElementById("games-notebook").hidden;
+      if (stageVisible) toggleRules("fight");
+      else if (nbVisible) toggleRules("notebook");
+    }
   });
 }
 

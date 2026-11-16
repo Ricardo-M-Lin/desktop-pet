@@ -149,13 +149,12 @@ def make_layer_record(name: str, width: int, height: int, rgba: bytes, hidden: b
         data = bytes(len(rgba)) if hidden else channel_bytes(rgba, channel)
         out += struct.pack(">hI", channel, 2 + len(rle_channel(data, width, height)))
     out += b"8BIMnorm"
-    # In PSD files bit 1 is set for a hidden layer (Cubism and ag-psd follow
-    # this convention even though the format notes describe it as the
-    # visibility bit).
-    # Keep the flag byte minimal: bit 1 is the hidden-layer bit in common PSD
-    # readers.  Bit 3 is optional and can make strict importers reject a
-    # hand-written file when no additional lock information follows.
-    out += bytes([opacity, 0, (2 if hidden else 0), 0])
+    # Adobe's PSD specification defines bit 1 as the visibility bit: set means
+    # visible. Bit 3 marks the Photoshop 5.0+ flag layout. The previous
+    # scaffold accidentally inverted visibility, which could make Cubism show
+    # an empty document even though the layer records were present.
+    flags = (0x08 if hidden else 0x0A)
+    out += bytes([opacity, 0, flags, 0])
     extra = pascal_name(name)
     out += struct.pack(">I", 4 + 4 + len(extra))
     out += struct.pack(">I", 0)  # layer mask data
@@ -194,9 +193,10 @@ def build_psd(width: int, height: int, rgba: bytes, scaffold: bool = True, inclu
         ]
     records = b"".join(make_layer_record(name, width, height, rgba, hidden, opacity, include_alpha) for name, hidden, opacity in names)
     pixels = b"".join(layer_pixels(rgba, width, height, hidden, include_alpha) for _, hidden, _ in names)
-    # A negative layer count tells PSD readers that the first alpha channel
-    # carries the merged transparency information.
-    layer_info = struct.pack(">h", -len(names) if include_alpha else len(names)) + records + pixels
+    # A positive layer count is the ordinary PSD form. The negative form is a
+    # legacy transparency-channel hint and is unnecessary because every layer
+    # already carries an explicit alpha channel.
+    layer_info = struct.pack(">h", len(names)) + records + pixels
     layer_info += b"\0" * ((4 - len(layer_info) % 4) % 4)
     layer_mask = struct.pack(">I", len(layer_info)) + layer_info + struct.pack(">I", 0)
 

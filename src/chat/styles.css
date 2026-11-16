@@ -2536,3 +2536,101 @@ input[type="range"] {
 @keyframes nb-ok { 0% { background: rgba(120, 200, 140, 0.12); } 100% { background: transparent; } }
 @keyframes nb-bad { 0% { background: rgba(200, 140, 90, 0.1); } 100% { background: transparent; } }
 @keyframes nb-danger { 0% { background: rgba(255, 60, 80, 0.22); } 100% { background: transparent; } }
+
+/* 规则 */
+.games-shell { position: relative; }
+.games-rules {
+  position: absolute;
+  inset: 0;
+  background: rgba(10, 5, 8, 0.78);
+  backdrop-filter: blur(2px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 5;
+  padding: 16px;
+}
+
+.games-rules[hidden] { display: none; }
+
+.rules-card {
+  width: 100%;
+  max-height: 100%;
+  overflow-y: auto;
+  border-radius: 14px;
+  padding: 18px 18px 20px;
+  background: linear-gradient(180deg, rgba(40, 22, 30, 0.99), rgba(26, 14, 20, 0.99));
+  border: 1px solid rgba(228, 105, 115, 0.3);
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.55);
+}
+
+.rules-card h3 {
+  margin: 0 0 10px;
+  font-size: 16px;
+  color: #f7e6ea;
+  letter-spacing: 0.05em;
+}
+
+.rules-body { font-size: 12.5px; color: #d9c2c8; line-height: 1.8; }
+.rules-body p { margin: 0 0 8px; }
+.rules-body ul { margin: 0; padding-left: 18px; }
+.rules-body li { margin-bottom: 4px; }
+.rules-body b { color: #ffd9de; font-weight: 600; }
+
+.rules-start {
+  margin-top: 14px;
+  width: 100%;
+  border: 0;
+  border-radius: 10px;
+  padding: 10px;
+  font-size: 13.5px;
+  cursor: pointer;
+  color: #2a0d13;
+  background: linear-gradient(180deg, #f0a0a8, #e46973);
+}
+
+.rules-btn {
+  position: absolute;
+  right: 20px;
+  bottom: 26px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(16, 9, 13, 0.7);
+  color: #c9adb4;
+  font-size: 11px;
+  border-radius: 999px;
+  padding: 4px 10px;
+  cursor: pointer;
+  z-index: 3;
+}
+
+.rules-btn:hover { color: #ffe3e7; border-color: rgba(228, 105, 115, 0.5); }
+
+.notebook-rules-btn { right: 12px; bottom: 14px; }
+
+.game-rules-mini {
+  margin-top: 2px;
+  font-size: 10.5px;
+  color: #7f6670;
+  line-height: 1.5;
+}
+
+.rules-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.rules-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding-right: 6px;
+}
+
+.rules-body::-webkit-scrollbar { width: 6px; }
+.rules-body::-webkit-scrollbar-thumb { background: rgba(228, 105, 115, 0.35); border-radius: 3px; }
+.rules-body::-webkit-scrollbar-track { background: transparent; }
+
+.rules-start { flex: none; }
+
+
+.games-shell.rules-open { min-height: min(560px, calc(100% - 24px)); }

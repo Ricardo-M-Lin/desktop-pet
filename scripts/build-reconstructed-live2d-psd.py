@@ -195,7 +195,10 @@ def build_psd_raw(helper, width: int, height: int, layers):
             data = bytes(len(rgba)) if hidden else helper.channel_bytes(rgba, channel)
             records.extend(struct.pack(">hI", channel, 2 + len(data)))
         records.extend(b"8BIMnorm")
-        records.extend(bytes([255, 0, (2 if hidden else 0), 0]))
+        # PSD layer flags: bit 1 means visible; bit 3 identifies the
+        # Photoshop 5.0+ flag layout. Keep hidden guide layers hidden while
+        # leaving the artwork layers visible to strict readers.
+        records.extend(bytes([255, 0, (0x08 if hidden else 0x0A), 0]))
         name_bytes = helper.pascal_name(name)
         records.extend(struct.pack(">I", 8 + len(name_bytes)))
         records.extend(struct.pack(">I", 0))
@@ -205,7 +208,7 @@ def build_psd_raw(helper, width: int, height: int, layers):
             data = bytes(len(rgba)) if hidden else helper.channel_bytes(rgba, channel)
             pixel_data.extend(struct.pack(">H", 0))
             pixel_data.extend(data)
-    info = struct.pack(">h", -len(layers)) + bytes(records) + bytes(pixel_data)
+    info = struct.pack(">h", len(layers)) + bytes(records) + bytes(pixel_data)
     info += b"\0" * ((4 - len(info) % 4) % 4)
     layer_mask = struct.pack(">I", len(info)) + info + struct.pack(">I", 0)
 

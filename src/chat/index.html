@@ -525,28 +525,40 @@
             <button class="memory-close" id="games-close" type="button" aria-label="关闭">×</button>
           </header>
 
+          <div class="games-rules" id="games-rules" hidden>
+            <div class="rules-card">
+              <h3 id="rules-title">玩法</h3>
+              <div class="rules-body" id="rules-body"></div>
+              <button class="rules-start" id="rules-start" type="button">开始</button>
+            </div>
+          </div>
+
           <div class="games-menu" id="games-menu">
             <button class="game-card" type="button" data-game="fight">
               <span class="game-emoji">⚔</span>
               <span class="game-name">街头对决</span>
               <span class="game-desc">她是对手，三局两胜</span>
+              <span class="game-rules-mini">← → 移动 · ↑ 跳 · J/K/L 出拳踢击 · 空格防御 · U 必杀</span>
             </button>
             <button class="game-card" type="button" data-game="notebook">
               <span class="game-emoji">✎</span>
               <span class="game-name">小本子</span>
               <span class="game-desc">她不开口，只能写字</span>
+              <span class="game-rules-mini">5 张字条 · 3 颗心 · 选错她会沉默</span>
             </button>
           </div>
 
           <div class="games-stage" id="games-stage" hidden>
             <canvas id="fight-canvas"></canvas>
             <div class="fight-hint" id="fight-hint"></div>
+            <button class="rules-btn" id="fight-rules-btn" type="button">规则 H</button>
           </div>
 
           <div class="games-notebook" id="games-notebook" hidden>
             <div class="notebook-paper" id="notebook-paper"></div>
             <div class="notebook-options" id="notebook-options"></div>
             <div class="notebook-meta" id="notebook-meta"></div>
+            <button class="rules-btn notebook-rules-btn" id="notebook-rules-btn" type="button">规则 H</button>
           </div>
         </div>
       </div>
