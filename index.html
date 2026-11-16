@@ -159,7 +159,10 @@
           </p>
           <div class="actions">
             <a class="btn btn-primary" id="download" href="https://github.com/linjunxin222/desktop-pet/releases/latest">
-              下载安装包（Windows）
+              下载安装版
+            </a>
+            <a class="btn btn-ghost" id="download-portable" href="https://github.com/linjunxin222/desktop-pet/releases/latest">
+              免安装版
             </a>
             <button class="btn btn-ghost" id="launch" type="button">在网页启动桌宠</button>
             <a class="btn btn-ghost" id="webcall" href="http://127.0.0.1:8890/ui" target="_blank" rel="noreferrer">网页视频通话</a>
@@ -204,6 +207,17 @@
       </section>
 
       <section>
+        <h2>装不上？先看这里</h2>
+        <div class="note">
+          <b>1. 提示「Windows 已保护你的电脑」</b>：安装包没有代码签名，点「更多信息 → 仍要运行」。<br />
+          <b>2. 双击没反应 / 被拦截</b>：可能是 360 等杀软拦了，先把文件加入信任，或用<b>免安装版</b>。<br />
+          <b>3. 提示不是有效的 Win32 程序</b>：这台电脑是 32 位系统，本应用只支持 64 位 Windows 10/11。<br />
+          <b>4. 下载到一半失败</b>：文件约 120~132 MB，重新下载后可用下方 SHA256 校验完整性。<br />
+          <b>5. 装完打不开</b>：先试免安装版；仍不行把报错截图发到仓库 Issues。
+        </div>
+      </section>
+
+      <section>
         <h2>「网页视频通话」怎么用</h2>
         <div class="note">
           这个按钮打开的是<b>本机语音服务提供的网页</b>（<code>http://127.0.0.1:8890/ui</code>）：
@@ -238,14 +252,21 @@
         var download = document.getElementById("download");
 
         // 优先直链到最近一次 Release 的安装包
+        var portable = document.getElementById("download-portable");
         fetch("https://api.github.com/repos/linjunxin222/desktop-pet/releases/latest")
           .then(function (r) { return r.ok ? r.json() : null; })
           .then(function (data) {
             if (!data || !data.assets || !data.assets.length) return;
-            var asset = data.assets.find(function (a) { return /\.exe$/i.test(a.name); });
-            if (asset) {
-              download.href = asset.browser_download_url;
-              download.textContent = "下载安装包 v" + String(data.tag_name || "").replace(/^v/, "");
+            var tag = String(data.tag_name || "").replace(/^v/, "");
+            var setupAsset = data.assets.find(function (a) { return /setup.*\.exe$/i.test(a.name); });
+            var portableAsset = data.assets.find(function (a) { return /portable.*\.exe$/i.test(a.name); });
+            if (setupAsset) {
+              download.href = setupAsset.browser_download_url;
+              download.textContent = "下载安装版 v" + tag;
+            }
+            if (portableAsset && portable) {
+              portable.href = portableAsset.browser_download_url;
+              portable.textContent = "免安装版 v" + tag;
             }
           })
           .catch(function () {});
