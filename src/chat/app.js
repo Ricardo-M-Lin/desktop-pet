@@ -2477,8 +2477,14 @@ setupMemoryPanel();
 
 setTimeout(() => {
   try {
-    if (new URLSearchParams(location.search).get("panel") === "memory") {
-      openMemory("nebula");
+    const params = new URLSearchParams(location.search);
+    const panel = params.get("panel");
+    if (panel === "memory") openMemory("nebula");
+    if (panel === "games") {
+      openGames();
+      const game = params.get("game");
+      if (game === "fight") startFight();
+      if (game === "notebook") startNotebook();
     }
   } catch {}
 }, 900);

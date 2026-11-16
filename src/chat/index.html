@@ -70,6 +70,9 @@
       <symbol id="i-alert" viewBox="0 0 24 24">
         <circle cx="12" cy="12" r="9" /><path d="M12 8v5" /><path d="M12 16h.01" />
       </symbol>
+      <symbol id="i-game" viewBox="0 0 24 24">
+        <path d="M7.2 7h9.6a5 5 0 0 1 4.9 6l-.7 3.1a2.6 2.6 0 0 1-4.5 1.3L14.6 15H9.4l-1.9 2.4a2.6 2.6 0 0 1-4.5-1.3L2.3 13a5 5 0 0 1 4.9-6Zm.3 3.2v1.6H6v-1.6h1.5Zm-.75 3.9v1.3H8v-1.3H6.75ZM16.5 11a1 1 0 1 0 0 2 1 1 0 0 0 0-2Zm-2.4-1.6a1 1 0 1 0 0 2 1 1 0 0 0 0-2Z" />
+      </symbol>
       <symbol id="i-phone" viewBox="0 0 24 24">
         <path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.3 1.8.6 2.6a2 2 0 0 1-.5 2.1L8.1 9.6a16 16 0 0 0 6.3 6.3l1.2-1.1a2 2 0 0 1 2.1-.5c.8.3 1.7.5 2.6.6a2 2 0 0 1 1.7 2Z" />
       </symbol>
@@ -102,6 +105,9 @@
           </div>
         </div>
         <div class="window-actions">
+          <button class="icon-btn" id="btn-games" type="button" title="小游戏">
+            <svg class="ico"><use href="#i-game"></use></svg>
+          </button>
           <button class="icon-btn" id="btn-call" type="button" title="视频通话">
             <svg class="ico"><use href="#i-phone"></use></svg>
           </button>
@@ -508,10 +514,48 @@
         </section>
       </div>
 
+
+      <div class="games-modal" id="games" hidden>
+        <div class="games-shell">
+          <header class="games-head">
+            <div>
+              <div class="games-title">小游戏</div>
+              <div class="games-sub">和她一起消磨时间</div>
+            </div>
+            <button class="memory-close" id="games-close" type="button" aria-label="关闭">×</button>
+          </header>
+
+          <div class="games-menu" id="games-menu">
+            <button class="game-card" type="button" data-game="fight">
+              <span class="game-emoji">⚔</span>
+              <span class="game-name">街头对决</span>
+              <span class="game-desc">她是对手，三局两胜</span>
+            </button>
+            <button class="game-card" type="button" data-game="notebook">
+              <span class="game-emoji">✎</span>
+              <span class="game-name">小本子</span>
+              <span class="game-desc">她不开口，只能写字</span>
+            </button>
+          </div>
+
+          <div class="games-stage" id="games-stage" hidden>
+            <canvas id="fight-canvas"></canvas>
+            <div class="fight-hint" id="fight-hint"></div>
+          </div>
+
+          <div class="games-notebook" id="games-notebook" hidden>
+            <div class="notebook-paper" id="notebook-paper"></div>
+            <div class="notebook-options" id="notebook-options"></div>
+            <div class="notebook-meta" id="notebook-meta"></div>
+          </div>
+        </div>
+      </div>
+
       <div class="toast-stack" id="toasts" aria-live="polite"></div>
     </div>
 
     <script src="./personas.js"></script>
     <script src="./app.js"></script>
+    <script src="./games.js"></script>
   </body>
 </html>

@@ -456,7 +456,11 @@ function createWindow() {
     if (items.length) Menu.buildFromTemplate(items).popup({ window: mainWindow });
   });
 
-  const query = shotMode ? { demo: shotMode } : (process.env.ERI_START_PANEL ? { panel: process.env.ERI_START_PANEL } : undefined);
+  const query = shotMode
+    ? { demo: shotMode }
+    : process.env.ERI_START_PANEL
+      ? { panel: process.env.ERI_START_PANEL, ...(process.env.ERI_START_GAME ? { game: process.env.ERI_START_GAME } : {}) }
+      : undefined;
   mainWindow.loadFile(path.join(APP_ROOT, "..", "src", "chat", "index.html"), query ? { query } : undefined);
 
     
