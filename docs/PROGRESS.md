@@ -1,5 +1,20 @@
 # 开发进度
 
+## 2026-11-16：Live2D 分层 PSD 转换准备
+
+- 保留原始模型骨架 `.live2d/eri_call_bust_skeleton.cmo3`，没有覆盖。
+- 修正 PSD 生成脚本中的图层可见性标志，并生成了新的重建 PSD 变体。
+- 用 FFmpeg 检查了无压缩 PSD 的合成图，可以正常读取；Cubism 仍未将手写 PSD 打开为可编辑模型。
+- 新增 `.live2d/reconstructed/eri_call_bust_reconstructed.ora`，将参考图和透明分层裁片打包为 OpenRaster，准备交给 Photopea 重新保存为标准 PSD。
+- 新增 `scripts/build-live2d-openraster.py`，可重复生成上述 ORA 文件。
+- Photopea 的自动化操作因浏览器状态读取失败暂未完成；下一步是用 Photopea 打开 ORA、另存为 PSD，再在 Cubism 中验证图层导入。
+- 当前分层仍是从合并图重建的初版，眼睛、嘴、前后发和被遮挡区域需要继续清理，导入成功后再做参数绑定。
+
+### 当前同步范围
+
+- 计划把本次 ORA 和生成脚本、进度记录同步到 GitHub。
+- 不提交 API key、缓存、临时截图、`node_modules` 或本机运行配置。
+
 ## 2026-11-15：完成 Live2D 分层准备包
 
 ### 本次完成
