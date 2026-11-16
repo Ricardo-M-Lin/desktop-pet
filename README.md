@@ -2,7 +2,9 @@
 
 ## 下载
 
-- 安装包：[GitHub Releases](https://github.com/linjunxin222/desktop-pet/releases/latest)（Windows，约 132 MB）
+- 安装版：[GitHub Releases](https://github.com/linjunxin222/desktop-pet/releases/latest)（Windows x64，约 132 MB）
+- 免安装版：同页面的 `eri-pet-portable-*.exe`（约 121 MB，双击直接运行，不需要管理员）
+- 系统要求：Windows 10 / 11 64 位；未签名，SmartScreen 需点「仍要运行」
 - 网页：[https://linjunxin222.github.io/desktop-pet/](https://linjunxin222.github.io/desktop-pet/)
 
 > 语音通话依赖本机 GPT-SoVITS 服务（模型 GB 级，不随安装包分发）；文字对话、记忆、桌宠动作换电脑即装即用。
