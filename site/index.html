@@ -162,6 +162,7 @@
               下载安装包（Windows）
             </a>
             <button class="btn btn-ghost" id="launch" type="button">在网页启动桌宠</button>
+            <a class="btn btn-ghost" id="webcall" href="http://127.0.0.1:8890/ui" target="_blank" rel="noreferrer">网页视频通话</a>
           </div>
           <div class="hint" id="hint">安装包约 132 MB，含桌宠本体、对话窗与记忆星云。</div>
         </div>
@@ -203,6 +204,17 @@
       </section>
 
       <section>
+        <h2>「网页视频通话」怎么用</h2>
+        <div class="note">
+          这个按钮打开的是<b>本机语音服务提供的网页</b>（<code>http://127.0.0.1:8890/ui</code>）：
+          她的脸、字幕、音量律动在浏览器里，麦克风采集和放音仍然由本机服务做，
+          所以效果和桌面版通话窗完全一致。<br />
+          前提：本机语音服务在跑（双击 <code>启动通话服务.cmd</code>，或开机自启）。
+          没跑的话页面打不开，回到「下载安装包」安装后由安装包自带的语音服务提供。
+        </div>
+      </section>
+
+      <section>
         <h2>关于语音</h2>
         <div class="note">
           桌宠、对话、记忆星云、头像互动、视频通话<b>界面</b>都随安装包提供，换电脑即装即用。<br />
@@ -237,6 +249,21 @@
             }
           })
           .catch(function () {});
+
+        var webcall = document.getElementById("webcall");
+        if (webcall) {
+          webcall.addEventListener("click", function (event) {
+            event.preventDefault();
+            fetch("http://127.0.0.1:8890/health", { mode: "no-cors", cache: "no-store" })
+              .then(function () {
+                window.open("http://127.0.0.1:8890/ui", "_blank", "noopener");
+              })
+              .catch(function () {
+                hint.className = "hint warn";
+                hint.textContent = "本机语音服务没在跑：先双击 启动通话服务.cmd，再点这个按钮。";
+              });
+          });
+        }
 
         launch.addEventListener("click", function () {
           var before = Date.now();
