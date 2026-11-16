@@ -431,6 +431,15 @@ function createWindow() {
     },
   });
 
+  mainWindow.webContents.on("console-message", (_e, level, message, line, sourceId) => {
+    try {
+      require("node:fs").appendFileSync(
+        require("node:path").join(require("node:os").tmpdir(), "renderer-console.log"),
+        `[${level}] ${message} (${sourceId}:${line})\n`,
+      );
+    } catch {}
+  });
+
   mainWindow.setMenu(null);
   mainWindow.setAlwaysOnTop(Boolean(settings.pinned));
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
