@@ -1,5 +1,38 @@
 # 开发进度
 
+## 2026-11-18：等待用量恢复后继续
+
+- 用户要求暂停两天，等待用量恢复后再开始外部协作和 Live2D 开发。
+- 已确定的路线是先使用现有透明 PNG 和 Cubism 试用版建立基础模型，再接入 Live2D Web SDK 和摄像头跟随。
+- DeepSeek 负责 Electron、Cubism SDK 和模型加载代码，千问负责分层检查、动作参数设计和视觉审查，我负责任务协调、合并和验收。
+- 当前没有向 DeepSeek 或千问发送任务，没有修改原始 `.live2d/eri_call_bust_skeleton.cmo3`，也没有提交或推送 GitHub。
+- 两天后从“Cubism 导入验证”继续，优先确认 PSD 拖放导入，再决定采用标准 PSD 或透明 PNG 手动建模。
+
+## 2026-11-18：Cubism 导入验证
+
+- 已启动 Cubism Editor 5.3，并确认原始 `.live2d/eri_call_bust_skeleton.cmo3` 可以正常打开，原有参考图和参数骨架保持不变。
+- 已用 Cubism 的文件选择器测试 `eri_call_bust_photopea.psd`、RGB 合成版和正数图层版；文件读取过程能完成，但没有弹出官方的 PSD 模型设置窗口，当前未将图层写入模型。
+- 依据 Live2D 官方流程，下一步改用把 PSD 直接拖入 Modeling Workspace 画布的方式导入；这一步需要继续使用桌面窗口操作。
+- 新增本地测试文件 `.live2d/reconstructed/eri_call_bust_photopea_rgb.psd`，它保留原 PSD 的图层数据，只把合成图改成 3 通道 RGB，用于兼容性排查。
+- 已在资源管理器中定位并选中 `eri_call_bust_photopea.psd`，Cubism 画布位置也已确认；拖放动作因窗口在切换时反复最小化，尚未完成。
+- 继续尝试窗口左右排列和拖放时，Cubism 与 Explorer 会在系统切换后再次最小化，未对模型工程产生写入。
+- 已检查本机常见 PSD 编辑器路径，未发现 Photoshop、Clip Studio Paint、Krita 或 GIMP。当前可选路径是安装官方兼容编辑器重新保存 PSD，或在 Cubism 中逐张拖入透明 PNG 手动建立 ArtMesh。
+- 没有覆盖 `.cmo3`，没有提交或推送 GitHub。
+
+## 2026-11-17：通过 Photopea 生成标准分层 PSD
+
+- 使用已获授权的分层 PNG，通过本机 Photopea 接口重新保存为标准 PSD；分层图片只在本机 HTTP bridge 中读取，没有上传到 GitHub。
+- 输出文件：`.live2d/reconstructed/eri_call_bust_photopea.psd`。
+- PSD 已验证为标准 `8BPS` 文件，包含 10 个带透明通道的图层，图层顺序为：袖子、右发饰、左发饰、嘴、右眼、左眼、前发、脸部、后发、身体底层。
+- FFmpeg 可以识别该 PSD 的 846×580 画布；Cubism 的实际导入仍需在编辑器中完成验证，尚未覆盖原有 `.cmo3` 骨架。
+- 本次没有整理、提交或推送 GitHub，保留当前仓库状态，后续继续做 Cubism 导入和 ArtMesh 参数绑定。
+
+### 明天继续
+
+1. 恢复 Live2D Cubism Editor，导入 `.live2d/reconstructed/eri_call_bust_photopea.psd`。
+2. 确认 10 个图层在 Cubism 中可见且透明边缘正确，再建立眼睛、嘴、头部和身体的 ArtMesh。
+3. 先绑定眨眼、口型和轻微头部跟随参数，再接入视频通话摄像头跟随。
+
 ## 2026-11-16：Live2D 分层 PSD 转换准备
 
 - 保留原始模型骨架 `.live2d/eri_call_bust_skeleton.cmo3`，没有覆盖。
@@ -83,7 +116,7 @@
 
 ### GitHub 同步尚未完成
 
-- 用户已授权：整理仓库、删除多余部分、提交并同步到 `https://github.com/linjunxin222/desktop-pet`，完成后打开仓库页面。
+- 用户已授权：整理仓库、删除多余部分、提交并同步到 `https://github.com/Ricardo-M-Lin/desktop-pet`，完成后打开仓库页面。
 - 已确认 GitHub 写入权限，已添加 `origin` 并获取 `origin/main`。
 - 获取到的远端提交为 `0f550f7`；本地仍是尚无提交的 `master` 分支，当前工作文件需保留。
 - 本次尚未创建提交、推送或改动远端内容。接入远端历史时不要覆盖现有工作文件，不要强制推送。
@@ -161,3 +194,11 @@
 - 小本子：字条补句，危险词触发「审判」，5 张字条 3 颗心
 - 发布 v1.0.2 安装版 + 免安装版
 - v1.0.3：两个游戏加入规则说明（开局弹规则卡、场内「规则 H」、按 H 随时看），格斗支持暂停
+## 2026-11-18：Live2D 建模路线决定
+
+- 当前 `.live2d/reconstructed/` 中的 10 张透明 PNG 都是 846×580 同画布，适合直接在 Cubism 中保持位置对齐。
+- Photopea 导出的分层 PSD 在 Cubism 中未出现 PSD 模型设置流程，继续反复改写 PSD 的收益较低。
+- 后续采用两阶段路线。先用透明 PNG 手动建立最小可用模型，完成头部角度、眨眼、嘴型和基础头发摆动，再接入视频通话窗口。
+- 相机跟随放在模型基础动作稳定后实现，用摄像头的人脸关键点驱动 Angle X/Y、眼睛开合和嘴型参数。
+- 原始 `.live2d/eri_call_bust_skeleton.cmo3` 保持不动，新模型另存为独立文件。当前不提交、不推送 GitHub。
+

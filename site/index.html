@@ -158,10 +158,10 @@
             打开对话窗可以聊天，也可以开视频通话——她说话时桌宠会停下来看着你。
           </p>
           <div class="actions">
-            <a class="btn btn-primary" id="download" href="https://github.com/linjunxin222/desktop-pet/releases/latest">
+            <a class="btn btn-primary" id="download" href="https://github.com/Ricardo-M-Lin/desktop-pet/releases/latest">
               下载安装版
             </a>
-            <a class="btn btn-ghost" id="download-portable" href="https://github.com/linjunxin222/desktop-pet/releases/latest">
+            <a class="btn btn-ghost" id="download-portable" href="https://github.com/Ricardo-M-Lin/desktop-pet/releases/latest">
               免安装版
             </a>
             <button class="btn btn-ghost" id="launch" type="button">在网页启动桌宠</button>
@@ -240,7 +240,7 @@
       </section>
 
       <footer>
-        绘梨衣桌宠 · <a href="https://github.com/linjunxin222/desktop-pet">GitHub 仓库</a> ·
+        绘梨衣桌宠 · <a href="https://github.com/Ricardo-M-Lin/desktop-pet">GitHub 仓库</a> ·
         角色素材仅用于个人桌面陪伴，请勿商用传播。
       </footer>
     </div>
@@ -253,7 +253,7 @@
 
         // 优先直链到最近一次 Release 的安装包
         var portable = document.getElementById("download-portable");
-        fetch("https://api.github.com/repos/linjunxin222/desktop-pet/releases/latest")
+        fetch("https://api.github.com/repos/Ricardo-M-Lin/desktop-pet/releases/latest")
           .then(function (r) { return r.ok ? r.json() : null; })
           .then(function (data) {
             if (!data || !data.assets || !data.assets.length) return;
