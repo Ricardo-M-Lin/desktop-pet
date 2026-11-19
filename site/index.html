@@ -158,7 +158,11 @@
             打开对话窗可以聊天，也可以开视频通话——她说话时桌宠会停下来看着你。
           </p>
           <div class="actions">
-            <a class="btn btn-primary" id="download" href="https://github.com/Ricardo-M-Lin/desktop-pet/releases/latest">
+            <a class="btn btn-primary" id="install-script"
+               href="https://github.com/Ricardo-M-Lin/desktop-pet/releases/latest/download/EriPet-Install.cmd">
+              一键安装（推荐）
+            </a>
+            <a class="btn btn-ghost" id="download" href="https://github.com/Ricardo-M-Lin/desktop-pet/releases/latest">
               下载安装版
             </a>
             <a class="btn btn-ghost" id="download-portable" href="https://github.com/Ricardo-M-Lin/desktop-pet/releases/latest">
@@ -206,6 +210,19 @@
           先装桌面版并**至少启动过一次**，之后点这个按钮，浏览器会通过 <b>eripet://</b> 唤起本机应用，
           和你从桌面双击启动完全一样。<br />
           没装的话点按钮不会有反应，按提示下载安装包即可。
+        </div>
+      </section>
+
+      <section>
+        <h2>最省事的方式：一键安装脚本</h2>
+        <div class="note">
+          点上面的「<b>一键安装（推荐）</b>」，会下载一个 <code>EriPet-Install.cmd</code>：<br />
+          双击它 → 自动从 GitHub 取最新安装包 → 启动安装。全程不需要手动找文件。<br />
+          <b>为什么它能绕过拦截：</b>浏览器下载会给 exe 打上「来自网络」标记，Windows 才弹安全提示；
+          这个脚本用系统接口直接下载，文件没有那个标记，SmartScreen 不会拦。<br />
+          <b>如果 Windows 还是提示「Windows 已保护你的电脑」：</b>点「更多信息」→「仍要运行」。<br />
+          <b>不放心脚本内容：</b>可以在 GitHub 上直接看源码
+          <code>install/EriPet-Install.cmd</code>，只有下载和启动两步。
         </div>
       </section>
 
