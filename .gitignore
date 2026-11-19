@@ -1,15 +1,27 @@
 # 依赖
 node_modules/
 
-# 运行与调试产物
+# 构建与临时产物
+dist/
+*.blockmap
 output/
-*.log
 logs/
 runtime/
-
-# Python 缓存
-__pycache__/
+*.log
 *.pyc
+__pycache__/
+
+# 本地模型权重（体积大，不入库）
+.minimax-h3-models/
+*.safetensors
+
+# Live2D 重建过程的测试与中间文件
+.live2d/video-samples/
+.live2d/**/*check*.png
+.live2d/**/raw-merged*.png
+
+# 下载站不托管安装包
+site/assets/*.exe
 
 # 系统/编辑器杂项
 .DS_Store
@@ -17,7 +29,3 @@ Thumbs.db
 desktop.ini
 .vscode/
 .idea/
-# 构建产物
-dist/
-/pet-build/
-site/assets/*.exe
