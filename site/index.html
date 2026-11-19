@@ -164,6 +164,9 @@
             <a class="btn btn-ghost" id="download-portable" href="https://github.com/Ricardo-M-Lin/desktop-pet/releases/latest">
               免安装版
             </a>
+            <a class="btn btn-ghost" id="download-zip" href="https://github.com/Ricardo-M-Lin/desktop-pet/releases/latest">
+              ZIP（被拦就用这个）
+            </a>
             <button class="btn btn-ghost" id="launch" type="button">在网页启动桌宠</button>
             <a class="btn btn-ghost" id="webcall" href="http://127.0.0.1:8890/ui" target="_blank" rel="noreferrer">网页视频通话</a>
           </div>
@@ -203,6 +206,19 @@
           先装桌面版并**至少启动过一次**，之后点这个按钮，浏览器会通过 <b>eripet://</b> 唤起本机应用，
           和你从桌面双击启动完全一样。<br />
           没装的话点按钮不会有反应，按提示下载安装包即可。
+        </div>
+      </section>
+
+      <section>
+        <h2>下载被浏览器拦了？</h2>
+        <div class="note">
+          安装包没有代码签名，Edge / Chrome / 360 可能提示「通常不会下载」「已阻止不常见的下载」。<br />
+          <b>Edge：</b>下载栏点「…」→ <b>保留</b> → 显示更多 → <b>仍要保留</b><br />
+          <b>Chrome：</b>下载栏点 <b>保留</b> → <b>仍要保留</b><br />
+          <b>360 / 火绒：</b>到隔离区或恢复区，恢复并加入信任<br />
+          <b>双击提示「Windows 已保护你的电脑」：</b>点「更多信息」→ <b>仍要运行</b><br />
+          <b>实在不行</b>：用「ZIP（被拦就用这个）」，解压后双击 <code>绘梨衣桌宠.exe</code>。<br />
+          下载完可核对 SHA256（见 Release 页面说明）。
         </div>
       </section>
 
@@ -267,6 +283,12 @@
             if (portableAsset && portable) {
               portable.href = portableAsset.browser_download_url;
               portable.textContent = "免安装版 v" + tag;
+            }
+            var zipAsset = data.assets.find(function (a) { return /\.zip$/i.test(a.name); });
+            var zipBtn = document.getElementById("download-zip");
+            if (zipAsset && zipBtn) {
+              zipBtn.href = zipAsset.browser_download_url;
+              zipBtn.textContent = "ZIP v" + tag;
             }
           })
           .catch(function () {});
