@@ -6,6 +6,17 @@ const { app, BrowserWindow, Menu, screen, dialog } = require("electron");
 // The development Electron bundle is inside a user workspace whose Windows
 // ACL does not grant AppContainer read access. Keep the renderer unsandboxed
 // so the local prototype can start without changing system ACLs.
+// 便携模式：U 盘里放一个 portable.txt，设置和记忆就跟着 U 盘走
+try {
+  const portableRoot = path.dirname(process.execPath);
+  if (fs.existsSync(path.join(portableRoot, "portable.txt"))) {
+    const dataDir = path.join(portableRoot, "data");
+    app.setPath("userData", dataDir);
+    process.env.ERI_MEMORY_DIR = path.join(dataDir, "识海");
+    process.env.ERI_PORTABLE = "1";
+  }
+} catch {}
+
 app.commandLine.appendSwitch("no-sandbox");
 // 让网页上的「启动桌宠」按钮能唤起本机应用
 try { app.setAsDefaultProtocolClient("eripet"); } catch {}
